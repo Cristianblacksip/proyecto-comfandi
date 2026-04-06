@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comfandi — Checkout Empresarial B2B</title>
+  <style>
+    :root {
+      --azul: #004691; --azul-dark: #003470;
+      --cian: #01bcdc; --verde: #97d700; --verde-dark: #82b900;
+      --fondo: #f4f7f9; --gris: #6b7280;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--fondo); color: #222; min-height: 100vh; display: flex; flex-direction: column; }
+
+    .page { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 16px; max-width: 960px; margin: 0 auto; width: 100%; }
+
+    /* Parties banner */
+    .parties { display: flex; flex-direction: column; gap: 10px; }
+    .party-card { background: #fff; border-radius: 14px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+    .party-role { font-size: .64rem; font-weight: 800; text-transform: uppercase; letter-spacing: .7px; margin-bottom: 5px; }
+    .party-role.seller { color: var(--cian); }
+    .party-role.buyer  { color: var(--verde-dark); }
+    .party-name { font-size: .95rem; font-weight: 800; color: var(--azul); }
+    .party-nit  { font-size: .7rem; color: var(--gris); margin-top: 2px; }
+
+    /* Order card */
+    .order-card { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.07); overflow: hidden; }
+    .order-hd { background: var(--azul); padding: 16px; color: #fff; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .order-hd h2 { font-size: 1rem; font-weight: 800; }
+    .order-hd p  { font-size: .7rem; opacity: .8; margin-top: 4px; }
+    .mode-badge { background: rgba(255,255,255,.18); color: #fff; font-size: .65rem; font-weight: 800; padding: 4px 10px; border-radius: 8px; white-space: nowrap; flex-shrink: 0; }
+    .order-body { padding: 16px; }
+
+    /* Responsive table → cards on mobile */
+    .order-table-wrap { overflow-x: auto; }
+    table.order-table { width: 100%; border-collapse: collapse; min-width: 500px; }
+    .order-table thead th {
+      padding: 11px 10px; font-size: .65rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .5px; color: var(--gris);
+      border-bottom: 2px solid #f0f0f0; text-align: left;
+    }
+    .order-table thead th:last-child { text-align: right; }
+    .order-table tbody td { padding: 13px 10px; border-bottom: 1px solid #f5f5f5; font-size: .82rem; vertical-align: middle; }
+    .collab-name { font-weight: 700; color: #333; display: block; }
+    .collab-service { font-size: .6rem; color: #bbb; text-transform: uppercase; display: block; margin-bottom: 2px; }
+    .cat-tag { font-size: .62rem; font-weight: 800; padding: 3px 8px; border-radius: 5px; }
+    .cat-A { background: #d1fae5; color: #065f46; }
+    .cat-B { background: #dbeafe; color: #1e40af; }
+    .cat-C { background: #fef3c7; color: #92400e; }
+    .cat-D { background: #f3f4f6; color: #6b7280; }
+    .pt-tag  { font-size: .62rem; font-weight: 700; color: var(--verde-dark); background: #f0ffe0; padding: 3px 8px; border-radius: 5px; }
+    .price-col { font-size: .9rem; font-weight: 800; color: var(--azul); text-align: right; }
+    .total-row-oms td { background: var(--fondo); padding: 14px 10px; font-weight: 700; }
+    .total-lbl { text-align: right; font-size: .78rem; color: var(--gris); text-transform: uppercase; }
+    .total-val { text-align: right; font-size: 1.3rem; font-weight: 900; color: var(--azul); }
+
+    /* Payload toggle */
+    .payload-toggle {
+      width: 100%; background: none; border: 1.5px solid #e0e8f4;
+      border-radius: 10px; padding: 10px 14px; font-size: .75rem; font-weight: 700;
+      color: var(--azul); cursor: pointer; display: flex; justify-content: space-between;
+      align-items: center; margin-top: 14px;
+    }
+    .payload-box { display: none; background: #1e1e2e; border-radius: 10px; padding: 14px; margin-top: 8px; overflow-x: auto; }
+    .payload-box pre { font-size: .68rem; color: #89dceb; font-family: 'Courier New', monospace; line-height: 1.6; white-space: pre-wrap; }
+
+    /* Empty */
+    .empty-state { text-align: center; padding: 40px 20px; color: #ccc; }
+    .empty-icon { font-size: 3rem; display: block; margin-bottom: 10px; }
+    .empty-state a { color: var(--azul); font-weight: 700; text-decoration: none; font-size: .85rem; }
+
+    /* Summary card */
+    .summary-card { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.07); overflow: hidden; }
+    .summary-hd { background: var(--azul); padding: 14px 16px; color: #fff; }
+    .summary-hd h3 { font-size: .88rem; font-weight: 800; }
+    .summary-body { padding: 14px 16px; }
+    .summary-line { display: flex; justify-content: space-between; font-size: .78rem; margin-bottom: 10px; color: var(--gris); }
+    .summary-line strong { color: #333; font-size: .75rem; }
+    .summary-total { display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #f0f0f0; padding-top: 12px; margin-top: 4px; }
+    .st-label { font-size: .75rem; font-weight: 700; text-transform: uppercase; color: var(--gris); }
+    .st-price { font-size: 1.2rem; font-weight: 900; color: var(--azul); }
+
+    .btn-confirm {
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; background: var(--azul); color: #fff;
+      padding: 16px; border-radius: 35px; font-weight: 800; font-size: .88rem;
+      border: none; cursor: pointer; transition: .2s; min-height: 52px; margin-top: 14px;
+    }
+    .btn-confirm:active { background: var(--azul-dark); }
+    .btn-confirm:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-back { display: block; text-align: center; margin-top: 10px; color: var(--gris); text-decoration: none; font-size: .75rem; font-weight: 600; }
+    .invoice-note { font-size: .65rem; color: #bbb; text-align: center; margin-top: 8px; line-height: 1.5; }
+
+    footer { background: var(--azul); color: #fff; padding: 28px 16px; text-align: center; }
+    footer p { font-size: .72rem; opacity: .75; }
+
+    @media (min-width: 640px) {
+      .parties { flex-direction: row; }
+      .party-card { flex: 1; }
+    }
+    @media (min-width: 900px) {
+      .page { flex-direction: row; align-items: flex-start; padding: 28px 20px; }
+      .left-col { flex: 1; display: flex; flex-direction: column; gap: 16px; }
+      .summary-card { width: 280px; flex-shrink: 0; position: sticky; top: 20px; }
+      footer { padding: 30px 5%; }
+    }
+  </style>
+</head>
+<body>
+
+{% include '_header.html' %}
+
+<main class="page">
+
+  <div class="left-col" style="flex:1; display:flex; flex-direction:column; gap:16px;">
+
+    <!-- Seller / Buyer parties -->
+    <div class="parties">
+      <div class="party-card">
+        <div class="party-role seller">🏢 Seller — Proveedor del servicio</div>
+        <div class="party-name">{{ seller.nombre }}</div>
+        <div class="party-nit">NIT {{ seller.nit }} · SKU {{ seller.sku }}</div>
+      </div>
+      <div class="party-card">
+        <div class="party-role buyer">🏗️ Buyer — Empresa compradora</div>
+        <div class="party-name">{{ empresa.nombre }}</div>
+        <div class="party-nit">NIT {{ empresa.nit }} · {{ empresa.representante }} · {{ empresa.plan }}</div>
+      </div>
+    </div>
+
+    <!-- Order table -->
+    <div class="order-card">
+      <div class="order-hd">
+        <div>
+          <h2>Orden de Cobro Empresarial</h2>
+          <p>Precio aplicado por categoría de colaborador · Price Table por ítem.</p>
+        </div>
+        <span class="mode-badge">B2B</span>
+      </div>
+      <div class="order-body">
+        {% if carrito %}
+        <div class="order-table-wrap">
+          <table class="order-table">
+            <thead>
+              <tr>
+                <th>Colaborador</th>
+                <th>Documento</th>
+                <th>Categoría</th>
+                <th>Price Table</th>
+                <th>Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in carrito %}
+              <tr>
+                <td>
+                  <span class="collab-service">{{ item.servicio }}</span>
+                  <span class="collab-name">{{ item.beneficiario }}</span>
+                </td>
+                <td style="font-size:.8rem; color:#555; font-family:monospace;">{{ item.documento or '—' }}</td>
+                <td><span class="cat-tag cat-{{ item.categoria }}">Cat. {{ item.categoria }}</span></td>
+                <td><span class="pt-tag">{{ item.price_table }}</span></td>
+                <td class="price-col">${{ "{:,.0f}".format(item.precio) }}</td>
+              </tr>
+              {% endfor %}
+              <tr class="total-row-oms">
+                <td colspan="4" class="total-lbl">VALOR TOTAL CONVENIO</td>
+                <td class="total-val">${{ "{:,.0f}".format(total) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <button class="payload-toggle" onclick="togglePayload()">
+          <span>🔌 Ver payload OMS (simulación)</span><span id="tog">▼</span>
+        </button>
+        <div class="payload-box" id="payload-box">
+          <pre>{% set oms = {"orderId":"ORD-B2B-PREVIEW","tipo":"B2B","seller":{"nombre":seller.nombre,"nit":seller.nit,"sku":seller.sku},"buyer":{"nombre":empresa.nombre,"nit":empresa.nit},"items":carrito} %}{{ oms | tojson(indent=2) }}</pre>
+        </div>
+
+        {% else %}
+        <div class="empty-state">
+          <span class="empty-icon">📋</span>
+          <p>No hay colaboradores en el pedido.</p>
+          <a href="/">← Volver al marketplace</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Summary sidebar -->
+  <div class="summary-card">
+    <div class="summary-hd"><h3>Resumen del convenio</h3></div>
+    <div class="summary-body">
+      <div class="summary-line"><span>Colaboradores</span><strong>{{ carrito|length }}</strong></div>
+      <div class="summary-line"><span>Servicio</span><strong>{{ seller.servicio }}</strong></div>
+      <div class="summary-line"><span>Empresa</span><strong>{{ empresa.nombre }}</strong></div>
+      <div class="summary-total">
+        <span class="st-label">Total</span>
+        <span class="st-price">${{ "{:,.0f}".format(total) }}</span>
+      </div>
+      {% if carrito %}
+      <form action="/confirmar-b2b" method="POST">
+        <input type="hidden" name="empresa_id" value="{{ empresa_id }}">
+        <button type="submit" class="btn-confirm">Generar Orden de Cobro</button>
+      </form>
+      {% else %}
+      <button class="btn-confirm" disabled>Generar Orden de Cobro</button>
+      {% endif %}
+      <a href="/?empresa={{ empresa_id }}" class="btn-back">← Agregar más colaboradores</a>
+      <p class="invoice-note">Se generará factura electrónica para<br>{{ empresa.nombre }} al confirmar.</p>
+    </div>
+  </div>
+
+</main>
+
+<footer><p>&copy; 2026 Comfandi. Vigilado Supersalud.</p></footer>
+
+<script>
+  function togglePayload() {
+    const box = document.getElementById('payload-box');
+    const tog = document.getElementById('tog');
+    const open = box.style.display === 'block';
+    box.style.display = open ? 'none' : 'block';
+    tog.textContent = open ? '▼' : '▲';
+  }
+</script>
+</body>
+</html>

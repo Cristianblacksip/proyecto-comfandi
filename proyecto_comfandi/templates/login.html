@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comfandi — Acceso eCommerce</title>
+  <style>
+    :root {
+      --azul: #004691; --azul-dark: #003470;
+      --cian: #01bcdc; --verde: #97d700; --verde-dark: #82b900;
+      --gris: #6b7280;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(150deg, var(--azul) 0%, #0060c0 55%, var(--cian) 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+
+    /* Card */
+    .login-card {
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      width: 100%; max-width: 400px;
+      overflow: hidden;
+    }
+
+    /* Header section */
+    .card-header {
+      background: var(--azul);
+      padding: 32px 28px 24px;
+      text-align: center;
+    }
+    .logo-wrap {
+      background: var(--cian);
+      display: inline-block;
+      padding: 14px 20px;
+      border-radius: 14px;
+      margin-bottom: 18px;
+    }
+    .logo-wrap img { height: 44px; display: block; }
+    .card-header h1 { font-size: 1.05rem; font-weight: 800; color: #fff; margin-bottom: 4px; }
+    .card-header p  { font-size: .78rem; color: rgba(255,255,255,.75); }
+
+    /* Pills */
+    .portal-pills {
+      display: flex; justify-content: center; gap: 8px; margin-top: 14px;
+    }
+    .pill {
+      font-size: .68rem; font-weight: 800; padding: 4px 12px;
+      border-radius: 20px; border: 1.5px solid rgba(255,255,255,.3); color: #fff;
+    }
+    .pill.b2b { background: rgba(255,255,255,.15); }
+    .pill.b2c { background: var(--verde); border-color: var(--verde); }
+
+    /* Body */
+    .card-body { padding: 28px; }
+    .form-title {
+      font-size: .72rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .8px; color: var(--gris); margin-bottom: 16px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .form-title::before, .form-title::after {
+      content: ''; flex: 1; height: 1px; background: #e5eaf2;
+    }
+
+    .field-label { font-size: .75rem; font-weight: 700; color: #444; display: block; margin-bottom: 6px; }
+    .field-wrap { position: relative; }
+    .field-input {
+      width: 100%; padding: 14px 44px 14px 14px;
+      border: 1.5px solid #dde3ed; border-radius: 12px;
+      font-size: 1rem; transition: .2s; background: #f9fafb;
+    }
+    .field-input:focus {
+      outline: none; border-color: var(--cian);
+      box-shadow: 0 0 0 3px rgba(1,188,220,.14); background: #fff;
+    }
+    .toggle-pw {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; font-size: 1.1rem;
+      color: var(--gris); padding: 4px;
+    }
+
+    /* Error */
+    .error-box {
+      background: #fff5f5; border: 1.5px solid #feb2b2; border-radius: 10px;
+      padding: 10px 13px; margin-bottom: 16px;
+      font-size: .78rem; font-weight: 600; color: #c53030;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    /* Submit */
+    .btn-login {
+      width: 100%; padding: 15px; margin-top: 18px;
+      background: var(--azul); color: #fff;
+      border: none; border-radius: 35px;
+      font-weight: 800; font-size: .95rem; cursor: pointer;
+      transition: .2s; min-height: 52px; letter-spacing: .3px;
+    }
+    .btn-login:hover  { background: var(--azul-dark); transform: translateY(-1px); }
+    .btn-login:active { transform: scale(.98); }
+
+    /* Footer note */
+    .card-footer {
+      background: #f9fafb; border-top: 1px solid #eee;
+      padding: 14px 28px; text-align: center;
+    }
+    .card-footer p { font-size: .68rem; color: #aaa; line-height: 1.6; }
+    .card-footer a { color: var(--azul); font-weight: 700; text-decoration: none; }
+
+    /* Outside text */
+    .outside-note { margin-top: 20px; font-size: .72rem; color: rgba(255,255,255,.6); text-align: center; }
+  </style>
+</head>
+<body>
+
+  <div class="login-card">
+    <!-- Header -->
+    <div class="card-header">
+      <div class="logo-wrap">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Comfandi">
+      </div>
+      <h1>eCommerce Comfandi</h1>
+      <p>Plataforma de comercio electrónico — Ambiente de pruebas</p>
+      <div class="portal-pills">
+        <span class="pill b2b">🏢 Portal B2B</span>
+        <span class="pill b2c">🛒 Portal B2C</span>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="card-body">
+      <div class="form-title">Acceso seguro</div>
+
+      {% if error %}
+      <div class="error-box">⚠️ {{ error }}</div>
+      {% endif %}
+
+      <form method="POST" autocomplete="off">
+        <label class="field-label" for="password">Contraseña de acceso</label>
+        <div class="field-wrap">
+          <input class="field-input" type="password" id="password" name="password"
+                 placeholder="Ingresa la contraseña" autofocus required>
+          <button type="button" class="toggle-pw" onclick="togglePw()" title="Mostrar/ocultar">👁</button>
+        </div>
+        <button type="submit" class="btn-login">Ingresar a la plataforma →</button>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="card-footer">
+      <p>&copy; 2026 Comfandi · Vigilado Supersalud<br>
+        Caja de Compensación Familiar del Valle del Cauca
+      </p>
+    </div>
+  </div>
+
+  <p class="outside-note">Acceso restringido — Solo personal autorizado</p>
+
+  <script>
+    function togglePw() {
+      const input = document.getElementById('password');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+  </script>
+</body>
+</html>
