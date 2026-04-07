@@ -1,18 +1,17 @@
 [build]
   functions = "netlify/functions"
   publish   = "public"
-  command   = "mkdir -p public && cp -r proyecto_comfandi/static/* public/static/ 2>/dev/null || true"
+  # Comando corregido: ahora los archivos están en la raíz
+  command   = "mkdir -p public/static && cp -r static/* public/static/ 2>/dev/null || true"
 
 [build.environment]
   PYTHON_VERSION = "3.11"
 
-# Archivos estáticos → servidos directo por CDN de Netlify (publish dir)
 [[redirects]]
   from   = "/static/*"
   to     = "/static/:splat"
   status = 200
 
-# Todo lo demás → función serverless Flask
 [[redirects]]
   from   = "/*"
   to     = "/.netlify/functions/api"
