@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comfandi — Portal B2B · Marketplace Empresarial</title>
+  <style>
+    :root {
+      --azul: #004691; --azul-dark: #003470;
+      --cian: #01bcdc; --verde: #97d700; --verde-dark: #82b900;
+      --fondo: #f4f7f9; --gris: #6b7280;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--fondo);
+      color: #222;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+
+    /* ── PAGE WRAPPER ── */
+    .page { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+
+    /* ── PRODUCT CARD ── */
+    .product-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.07);
+      overflow: hidden;
+    }
+    .seller-banner {
+      background: linear-gradient(135deg, var(--azul) 0%, #0060c0 100%);
+      padding: 16px;
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+    }
+    .seller-name { color: #fff; }
+    .seller-verified {
+      font-size: .65rem; font-weight: 800; letter-spacing: .5px;
+      opacity: .85; display: flex; align-items: center; gap: 4px; margin-bottom: 4px;
+    }
+    .seller-verified::before { content: '✓'; background: var(--verde); color: #fff; padding: 1px 5px; border-radius: 3px; }
+    .seller-nombre { font-size: 1rem; font-weight: 800; color: #fff; }
+    .seller-nit    { font-size: .7rem; opacity: .7; margin-top: 2px; color: #fff; }
+    .sku-badge {
+      background: rgba(255,255,255,.18); color: #fff;
+      font-size: .64rem; font-weight: 700; padding: 4px 10px;
+      border-radius: 8px; white-space: nowrap; flex-shrink: 0;
+    }
+
+    .product-body { padding: 16px; }
+
+    .product-icon {
+      background: linear-gradient(135deg, #f0f7ff, #e8f4fc);
+      border-radius: 14px; height: 140px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4rem; margin-bottom: 14px;
+    }
+    .product-title { font-size: 1.15rem; font-weight: 900; color: var(--azul); margin-bottom: 4px; }
+    .product-sku   { font-size: .65rem; color: #bbb; font-weight: 600; margin-bottom: 8px; }
+    .product-desc  { font-size: .82rem; color: var(--gris); line-height: 1.65; margin-bottom: 16px; }
+
+    /* Price tables grid */
+    .pt-title { font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .7px; color: var(--gris); margin-bottom: 8px; }
+    .pt-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px; margin-bottom: 18px;
+    }
+    .pt-card {
+      border: 2px solid #e5eaf2; border-radius: 12px;
+      padding: 12px 8px; text-align: center; transition: .2s;
+    }
+    .pt-card.active { border-color: var(--verde); background: #f5ffe6; }
+    .pt-cat   { font-size: .62rem; font-weight: 700; text-transform: uppercase; color: var(--gris); display: block; margin-bottom: 2px; }
+    .pt-name  { font-size: .58rem; font-weight: 700; color: var(--verde-dark); display: block; margin-bottom: 5px; }
+    .pt-price { font-size: 1rem; font-weight: 900; color: var(--azul); display: block; }
+    .pt-unit  { font-size: .58rem; color: #bbb; display: block; margin-top: 2px; }
+
+    /* Form */
+    .form-section { border-top: 1px solid #f0f0f0; padding-top: 16px; }
+    .form-title { font-size: .78rem; font-weight: 800; color: var(--azul); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
+    .field-label { font-size: .74rem; font-weight: 700; color: #444; display: block; margin-bottom: 5px; }
+    .field-input {
+      width: 100%; padding: 13px 14px; border: 1.5px solid #dde3ed; border-radius: 10px;
+      font-size: 1rem; /* 1rem prevents iOS zoom */ margin-bottom: 10px; transition: .2s;
+    }
+    .field-input:focus { outline: none; border-color: var(--cian); box-shadow: 0 0 0 3px rgba(1,188,220,.12); }
+
+    #result-box {
+      border-radius: 10px; padding: 11px 13px; margin-bottom: 10px;
+      font-size: .78rem; font-weight: 600; display: none; line-height: 1.5;
+    }
+    #result-box.found     { background: #f0fff4; border: 1.5px solid #86efac; color: #15803d; }
+    #result-box.not-found { background: #fffbeb; border: 1.5px solid #fcd34d; color: #92400e; }
+    #result-box.loading   { background: #f0f7ff; border: 1.5px solid #bfdbfe; color: var(--azul); }
+
+    #manual-name { display: none; margin-bottom: 10px; }
+    .btn-add {
+      width: 100%; padding: 15px; background: var(--verde); color: #fff;
+      border: none; border-radius: 35px; font-weight: 800; font-size: .9rem;
+      cursor: pointer; text-transform: uppercase; letter-spacing: .5px;
+      transition: .2s; min-height: 50px;
+    }
+    .btn-add:active { background: var(--verde-dark); transform: scale(.98); }
+
+    /* ── CART PANEL ── */
+    .cart-panel {
+      background: #fff; border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.07); overflow: hidden;
+    }
+    .cart-header {
+      background: var(--azul); padding: 14px 16px; color: #fff;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .cart-header h3 { font-size: .88rem; font-weight: 800; }
+    .cart-count { background: var(--verde); color: #fff; font-size: .68rem; font-weight: 800; padding: 2px 9px; border-radius: 10px; }
+
+    .cart-body { padding: 14px 16px; }
+    .empresa-badge {
+      background: #eef4ff; border-radius: 8px; padding: 8px 12px;
+      margin-bottom: 12px; font-size: .75rem; color: var(--azul); font-weight: 700;
+    }
+    .empresa-badge small { display: block; font-size: .64rem; color: var(--gris); font-weight: 400; margin-top: 2px; }
+
+    .collab-item {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 10px 0; border-bottom: 1px solid #f5f5f5;
+    }
+    .collab-name { font-size: .82rem; font-weight: 700; color: #333; }
+    .collab-doc  { font-size: .64rem; color: #bbb; }
+    .collab-tags { display: flex; gap: 4px; margin-top: 3px; flex-wrap: wrap; }
+    .cat-badge   { font-size: .6rem; font-weight: 800; padding: 2px 7px; border-radius: 5px; }
+    .cat-A { background: #d1fae5; color: #065f46; }
+    .cat-B { background: #dbeafe; color: #1e40af; }
+    .cat-C { background: #fef3c7; color: #92400e; }
+    .cat-D { background: #f3f4f6; color: #6b7280; }
+    .pt-tag { font-size: .58rem; font-weight: 700; color: var(--verde-dark); background: #f0ffe0; padding: 2px 6px; border-radius: 4px; }
+    .collab-price { font-size: .88rem; font-weight: 800; color: var(--azul); white-space: nowrap; }
+
+    .cart-empty { text-align: center; padding: 28px 0; color: #ccc; }
+    .cart-empty-icon { font-size: 2.5rem; display: block; margin-bottom: 8px; }
+    .cart-empty-text { font-size: .78rem; line-height: 1.5; }
+
+    .cart-total {
+      display: flex; justify-content: space-between; align-items: center;
+      border-top: 2px solid #f0f0f0; padding-top: 12px; margin-top: 8px;
+    }
+    .cart-total-label { font-size: .75rem; font-weight: 700; color: var(--gris); text-transform: uppercase; }
+    .cart-total-price { font-size: 1.25rem; font-weight: 900; color: var(--azul); }
+
+    .btn-checkout {
+      display: block; background: var(--azul); color: #fff; text-align: center;
+      padding: 15px; border-radius: 14px; text-decoration: none;
+      font-weight: 800; font-size: .88rem; margin-top: 12px;
+      transition: .2s; min-height: 50px; line-height: 1.2;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .btn-checkout:active { background: var(--azul-dark); }
+    .btn-clear {
+      display: block; text-align: center; margin-top: 10px;
+      color: #ccc; text-decoration: none; font-size: .7rem; font-weight: 600;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--azul); color: #fff;
+      padding: 28px 16px; text-align: center; margin-top: auto;
+    }
+    .footer-copy { font-size: .72rem; opacity: .75; line-height: 1.8; }
+    .footer-links { display: flex; justify-content: center; gap: 16px; margin-top: 8px; }
+    .footer-links a { color: #fff; opacity: .65; font-size: .7rem; text-decoration: none; }
+
+    /* ══════════════ RESPONSIVE ══════════════ */
+    @media (min-width: 480px) {
+      .pt-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    @media (min-width: 900px) {
+      .page {
+        max-width: 1200px; margin: 28px auto;
+        flex-direction: row; align-items: flex-start;
+        padding: 0 20px;
+      }
+      .product-card { flex: 1; }
+      .cart-panel { width: 360px; flex-shrink: 0; position: sticky; top: 130px; }
+      .product-icon { height: 180px; font-size: 5rem; }
+      footer { padding: 36px 5%; }
+      .footer-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+
+{% include '_header.html' %}
+
+<main class="page">
+
+  <!-- ── PRODUCT CARD (Seller listing) ── -->
+  <div class="product-card">
+    <div class="seller-banner">
+      <div class="seller-name">
+        <div class="seller-verified">SELLER VERIFICADO EN MARKETPLACE COMFANDI</div>
+        <div class="seller-nombre">{{ seller.nombre }}</div>
+        <div class="seller-nit">NIT {{ seller.nit }}</div>
+      </div>
+      <span class="sku-badge">SKU: {{ seller.sku }}</span>
+    </div>
+
+    <div class="product-body">
+      <div class="product-icon">🏠</div>
+      <div class="product-title">{{ seller.servicio }}</div>
+      <div class="product-sku">SKU: {{ seller.sku }}</div>
+      <p class="product-desc">{{ seller.descripcion }}</p>
+
+      <div class="pt-title">Precios por categoría de colaborador</div>
+      <div class="pt-grid">
+        {% for cat, precio in seller.precios.items() %}
+        <div class="pt-card" id="ptcard-{{ cat }}">
+          <span class="pt-cat">{% if cat == 'D' %}No Afiliado{% else %}Categoría {{ cat }}{% endif %}</span>
+          <span class="pt-name">{{ seller.price_tables[cat] }}</span>
+          <span class="pt-price">${{ "{:,.0f}".format(precio) }}</span>
+          <span class="pt-unit">/ {{ seller.unidad }}</span>
+        </div>
+        {% endfor %}
+      </div>
+
+      <form class="form-section" method="POST">
+        <input type="hidden" name="empresa_id" value="{{ empresa_id }}">
+        <div class="form-title">Agregar colaborador al pedido</div>
+
+        <label class="field-label">Documento del colaborador</label>
+        <input class="field-input" type="text" name="cedula" id="ced"
+               placeholder="Ej: 111001, 111002, 111003…" autocomplete="off" required>
+
+        <div id="result-box"></div>
+
+        <div id="manual-name">
+          <label class="field-label">Nombre (no encontrado en base)</label>
+          <input class="field-input" type="text" name="nombre_manual" placeholder="Nombre completo">
+        </div>
+
+        <button type="submit" class="btn-add">+ Agregar al pedido</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── CART PANEL ── -->
+  <div class="cart-panel">
+    <div class="cart-header">
+      <h3>Pedido Empresarial</h3>
+      <span class="cart-count">{{ carrito|length }} colab.</span>
+    </div>
+    <div class="cart-body">
+      <div class="empresa-badge">
+        🏢 {{ empresa.nombre }}
+        <small>NIT {{ empresa.nit }}</small>
+      </div>
+
+      {% if carrito %}
+        {% for item in carrito %}
+        <div class="collab-item">
+          <div>
+            <div class="collab-name">{{ item.beneficiario }}</div>
+            <div class="collab-doc">Doc: {{ item.documento or '—' }}</div>
+            <div class="collab-tags">
+              <span class="cat-badge cat-{{ item.categoria }}">Cat. {{ item.categoria }}</span>
+              <span class="pt-tag">{{ item.price_table }}</span>
+            </div>
+          </div>
+          <span class="collab-price">${{ "{:,.0f}".format(item.precio) }}</span>
+        </div>
+        {% endfor %}
+
+        <div class="cart-total">
+          <span class="cart-total-label">Total pedido</span>
+          <span class="cart-total-price">${{ "{:,.0f}".format(total) }}</span>
+        </div>
+        <a href="/checkout-b2b?empresa={{ empresa_id }}" class="btn-checkout">Generar Orden de Cobro →</a>
+        <a href="/limpiar" class="btn-clear">Vaciar pedido</a>
+
+      {% else %}
+        <div class="cart-empty">
+          <span class="cart-empty-icon">📋</span>
+          <span class="cart-empty-text">Ingrese el documento de cada<br>colaborador para agregar servicios.</span>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-copy">
+      <strong>Comfandi</strong> — Caja de Compensación Familiar del Valle del Cauca<br>
+      &copy; 2026 Comfandi. Vigilado por Supersalud.
+    </div>
+    <div class="footer-links">
+      <a href="#">Términos</a><a href="#">Privacidad</a><a href="#">PQR</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const API = '/_v/affiliation/';
+  const cedInput  = document.getElementById('ced');
+  const resultBox = document.getElementById('result-box');
+  const manualBox = document.getElementById('manual-name');
+  const sellerPrecios = { A: {{ seller.precios.A }}, B: {{ seller.precios.B }}, C: {{ seller.precios.C }}, D: {{ seller.precios.D }} };
+
+  function highlightPT(cat) {
+    document.querySelectorAll('.pt-card').forEach(c => c.classList.remove('active'));
+    const el = document.getElementById('ptcard-' + cat);
+    if (el) el.classList.add('active');
+  }
+
+  let timer;
+  cedInput.addEventListener('input', function () {
+    const val = this.value.trim();
+    clearTimeout(timer);
+    resultBox.style.display = 'none';
+    manualBox.style.display = 'none';
+    highlightPT('');
+    if (val.length < 3) return;
+
+    resultBox.className = 'loading';
+    resultBox.innerHTML = '🔍 Consultando Master Data…';
+    resultBox.style.display = 'block';
+
+    timer = setTimeout(() => {
+      fetch(API + encodeURIComponent(val))
+        .then(r => r.json())
+        .then(data => {
+          const precio = sellerPrecios[data.category] || sellerPrecios.D;
+          if (data.found) {
+            resultBox.className = 'found';
+            resultBox.innerHTML = `✅ <strong>${data.nombre}</strong><br>Categoría <strong>${data.category}</strong> · ${data.price_table} · <strong>$${precio.toLocaleString('es-CO')}</strong>`;
+            manualBox.style.display = 'none';
+          } else {
+            resultBox.className = 'not-found';
+            resultBox.innerHTML = `⚠️ No encontrado — Categoría <strong>D</strong> · PRICE_D · <strong>$${precio.toLocaleString('es-CO')}</strong>`;
+            manualBox.style.display = 'block';
+          }
+          highlightPT(data.category);
+          resultBox.style.display = 'block';
+        })
+        .catch(() => { resultBox.className = 'not-found'; resultBox.innerHTML = '❌ Error consultando el servicio.'; resultBox.style.display = 'block'; });
+    }, 400);
+  });
+</script>
+</body>
+</html>

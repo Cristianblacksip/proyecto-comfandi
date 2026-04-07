@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comfandi — Finalizar Compra B2C</title>
+  <style>
+    :root {
+      --azul: #004691; --azul-dark: #003470;
+      --cian: #01bcdc; --verde: #97d700; --verde-dark: #82b900;
+      --fondo: #f4f7f9; --gris: #6b7280;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--fondo); color: #222; min-height: 100vh; display: flex; flex-direction: column; }
+
+    .page { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 16px; max-width: 860px; margin: 0 auto; width: 100%; }
+
+    /* Steps */
+    .steps { display: flex; align-items: center; gap: 6px; padding: 12px 0 4px; overflow-x: auto; }
+    .step { font-size: .75rem; font-weight: 700; color: #bbb; white-space: nowrap; padding: 5px 10px; border-radius: 20px; }
+    .step.active { background: var(--verde); color: #fff; }
+    .step.done   { color: var(--verde-dark); }
+    .step-sep { color: #ddd; font-size: .8rem; flex-shrink: 0; }
+
+    /* Order card */
+    .order-card { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.07); overflow: hidden; }
+    .order-card-hd { background: var(--azul); padding: 16px; color: #fff; }
+    .order-card-hd h2 { font-size: 1rem; font-weight: 800; }
+    .order-card-hd p  { font-size: .72rem; opacity: .8; margin-top: 4px; }
+    .order-body { padding: 16px; }
+
+    /* Item rows (mobile: stacked) */
+    .order-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 4px 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid #f5f5f5;
+      align-items: start;
+    }
+    .item-product { font-size: .62rem; color: #bbb; text-transform: uppercase; font-weight: 700; grid-column: 1; }
+    .item-sku     { font-size: .58rem; color: #ccc; grid-column: 1; margin-top: 1px; }
+    .item-ben     { font-size: .88rem; font-weight: 700; color: #333; grid-column: 1; }
+    .item-doc     { font-size: .66rem; color: #aaa; grid-column: 1; }
+    .item-tags    { display: flex; gap: 5px; flex-wrap: wrap; grid-column: 1; margin-top: 4px; }
+    .cat-tag      { font-size: .62rem; font-weight: 800; padding: 3px 8px; border-radius: 5px; }
+    .cat-A { background: #d1fae5; color: #065f46; }
+    .cat-B { background: #dbeafe; color: #1e40af; }
+    .cat-C { background: #fef3c7; color: #92400e; }
+    .cat-D { background: #f3f4f6; color: #6b7280; }
+    .pt-tag  { font-size: .6rem; font-weight: 700; color: var(--verde-dark); background: #f0ffe0; padding: 3px 7px; border-radius: 5px; }
+    .item-price { font-size: 1rem; font-weight: 800; color: var(--azul); text-align: right; grid-column: 2; grid-row: 1 / 6; align-self: center; }
+
+    .total-section { display: flex; justify-content: space-between; align-items: center; background: var(--fondo); border-radius: 10px; padding: 14px; margin-top: 4px; }
+    .total-label { font-size: .8rem; font-weight: 700; color: var(--gris); text-transform: uppercase; }
+    .total-price { font-size: 1.4rem; font-weight: 900; color: var(--azul); }
+
+    /* Payload toggle */
+    .payload-toggle {
+      width: 100%; background: none; border: 1.5px solid #e0e8f4;
+      border-radius: 10px; padding: 10px 14px; font-size: .75rem; font-weight: 700;
+      color: var(--azul); cursor: pointer; display: flex; justify-content: space-between;
+      align-items: center; margin-top: 14px;
+    }
+    .payload-box { display: none; background: #1e1e2e; border-radius: 10px; padding: 14px; margin-top: 8px; overflow-x: auto; }
+    .payload-box pre { font-size: .68rem; color: #a6e3a1; font-family: 'Courier New', monospace; line-height: 1.6; white-space: pre-wrap; }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 40px 20px; color: #ccc; }
+    .empty-icon { font-size: 3rem; display: block; margin-bottom: 10px; }
+    .empty-state a { color: var(--azul); font-weight: 700; text-decoration: none; font-size: .85rem; }
+
+    /* Summary card */
+    .summary-card { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.07); overflow: hidden; }
+    .summary-hd { background: var(--verde); padding: 14px 16px; color: #fff; }
+    .summary-hd h3 { font-size: .88rem; font-weight: 800; }
+    .summary-body { padding: 14px 16px; }
+    .summary-line { display: flex; justify-content: space-between; font-size: .8rem; margin-bottom: 10px; color: var(--gris); }
+    .summary-line strong { color: #333; }
+    .summary-total { display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #f0f0f0; padding-top: 12px; margin-top: 4px; }
+    .st-label { font-size: .78rem; font-weight: 700; text-transform: uppercase; color: var(--gris); }
+    .st-price { font-size: 1.3rem; font-weight: 900; color: var(--azul); }
+
+    .security-note { font-size: .68rem; color: #bbb; text-align: center; margin: 10px 0; display: flex; align-items: center; justify-content: center; gap: 4px; }
+
+    .btn-confirm {
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; background: var(--verde); color: #fff;
+      padding: 16px; border-radius: 35px; font-weight: 800; font-size: .9rem;
+      border: none; cursor: pointer; transition: .2s; min-height: 52px; text-decoration: none;
+    }
+    .btn-confirm:active { background: var(--verde-dark); }
+    .btn-confirm:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-back { display: block; text-align: center; margin-top: 10px; color: var(--gris); text-decoration: none; font-size: .78rem; font-weight: 600; }
+
+    footer { background: var(--azul); color: #fff; padding: 28px 16px; text-align: center; }
+    footer p { font-size: .72rem; opacity: .75; }
+
+    @media (min-width: 768px) {
+      .page { flex-direction: row; align-items: flex-start; padding: 28px 20px; margin: 0 auto; }
+      .order-card { flex: 1; }
+      .summary-card { width: 280px; flex-shrink: 0; position: sticky; top: 20px; }
+      footer { padding: 30px 5%; }
+    }
+  </style>
+</head>
+<body>
+
+{% include '_header.html' %}
+
+<main class="page">
+
+  <div style="display:flex; flex-direction:column; gap:16px; flex:1;">
+    <!-- Steps -->
+    <div class="steps">
+      <span class="step active">① Carrito</span>
+      <span class="step-sep">›</span>
+      <span class="step">② Pago</span>
+      <span class="step-sep">›</span>
+      <span class="step">③ Confirmación</span>
+    </div>
+
+    <!-- Order card -->
+    <div class="order-card">
+      <div class="order-card-hd">
+        <h2>Resumen de tu compra</h2>
+        <p>Revisa los ítems, beneficiarios y precios aplicados antes de continuar.</p>
+      </div>
+      <div class="order-body">
+        {% if carrito %}
+          {% for item in carrito %}
+          <div class="order-item">
+            <span class="item-product">{{ item.servicio }}</span>
+            <span class="item-sku">SKU: {{ item.sku }}</span>
+            <span class="item-ben">{{ item.beneficiario }}</span>
+            <span class="item-doc">Doc: {{ item.documento or '—' }}</span>
+            <div class="item-tags">
+              <span class="cat-tag cat-{{ item.categoria }}">Cat. {{ item.categoria }}</span>
+              <span class="pt-tag">{{ item.price_table }}</span>
+            </div>
+            <span class="item-price">${{ "{:,.0f}".format(item.precio) }}</span>
+          </div>
+          {% endfor %}
+          <div class="total-section">
+            <span class="total-label">Total a pagar</span>
+            <span class="total-price">${{ "{:,.0f}".format(total) }}</span>
+          </div>
+
+          <button class="payload-toggle" onclick="togglePayload()">
+            <span>🔌 Ver payload OMS (simulación)</span><span id="tog">▼</span>
+          </button>
+          <div class="payload-box" id="payload-box">
+            <pre>{{ carrito | tojson(indent=2) }}</pre>
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <span class="empty-icon">🛒</span>
+            <p>Tu carrito está vacío.</p>
+            <a href="/vacunas">← Volver a la tienda</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary sidebar -->
+  <div class="summary-card">
+    <div class="summary-hd"><h3>Resumen del pedido</h3></div>
+    <div class="summary-body">
+      <div class="summary-line"><span>Ítems</span><strong>{{ carrito|length }}</strong></div>
+      <div class="summary-line"><span>Subtotal</span><strong>${{ "{:,.0f}".format(total) }}</strong></div>
+      <div class="summary-line"><span>IVA incluido</span><strong>✓</strong></div>
+      <div class="summary-total">
+        <span class="st-label">Total</span>
+        <span class="st-price">${{ "{:,.0f}".format(total) }}</span>
+      </div>
+      <div class="security-note">🔒 Pago seguro SSL</div>
+      {% if carrito %}
+      <form action="/confirmar-b2c" method="POST">
+        <button type="submit" class="btn-confirm">Proceder al pago →</button>
+      </form>
+      {% else %}
+      <button class="btn-confirm" disabled>Proceder al pago →</button>
+      {% endif %}
+      <a href="/vacunas" class="btn-back">← Seguir comprando</a>
+    </div>
+  </div>
+
+</main>
+
+<footer><p>&copy; 2026 Comfandi. Vigilado Supersalud.</p></footer>
+
+<script>
+  function togglePayload() {
+    const box = document.getElementById('payload-box');
+    const tog = document.getElementById('tog');
+    const open = box.style.display === 'block';
+    box.style.display = open ? 'none' : 'block';
+    tog.textContent = open ? '▼' : '▲';
+  }
+</script>
+</body>
+</html>
