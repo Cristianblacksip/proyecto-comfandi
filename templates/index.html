@@ -50,10 +50,17 @@
 
     .product-body { padding: 16px; }
 
-    .product-icon {
+    .product-img-b2b {
+      border-radius: 14px; height: 200px;
+      overflow: hidden; margin-bottom: 14px; position: relative;
+    }
+    .product-img-b2b img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .product-icon-fallback {
       background: linear-gradient(135deg, #f0f7ff, #e8f4fc);
       border-radius: 14px; height: 140px;
-      display: flex; align-items: center; justify-content: center;
+      display: none; align-items: center; justify-content: center;
       font-size: 4rem; margin-bottom: 14px;
     }
     .product-title { font-size: 1.15rem; font-weight: 900; color: var(--azul); margin-bottom: 4px; }
@@ -150,13 +157,40 @@
     .cart-total-price { font-size: 1.25rem; font-weight: 900; color: var(--azul); }
 
     .btn-checkout {
-      display: block; background: var(--azul); color: #fff; text-align: center;
+      display: flex; background: var(--azul); color: #fff; text-align: center;
       padding: 15px; border-radius: 14px; text-decoration: none;
       font-weight: 800; font-size: .88rem; margin-top: 12px;
       transition: .2s; min-height: 50px; line-height: 1.2;
-      display: flex; align-items: center; justify-content: center;
+      align-items: center; justify-content: center;
     }
     .btn-checkout:active { background: var(--azul-dark); }
+
+    /* Sticky comprar — solo mobile */
+    .sticky-comprar {
+      display: none;
+    }
+    @media (max-width: 899px) {
+      .sticky-comprar {
+        display: flex;
+        position: fixed; bottom: 0; left: 0; right: 0; z-index: 500;
+        background: #fff;
+        padding: 12px 16px;
+        box-shadow: 0 -4px 16px rgba(0,0,0,.12);
+        gap: 10px; align-items: center;
+      }
+      .sticky-comprar-total {
+        font-size: .78rem; font-weight: 800; color: var(--azul); white-space: nowrap;
+      }
+      .sticky-comprar-total small { display: block; font-size: .62rem; color: var(--gris); font-weight: 400; }
+      .sticky-comprar a {
+        flex: 1; display: flex; align-items: center; justify-content: center;
+        background: var(--azul); color: #fff; text-decoration: none;
+        padding: 14px; border-radius: 35px; font-weight: 800; font-size: .9rem;
+        min-height: 50px;
+      }
+      /* Espacio para que el carrito no quede tapado por el sticky */
+      .cart-panel { padding-bottom: 80px; }
+    }
     .btn-clear {
       display: block; text-align: center; margin-top: 10px;
       color: #ccc; text-decoration: none; font-size: .7rem; font-weight: 600;
@@ -208,7 +242,11 @@
     </div>
 
     <div class="product-body">
-      <div class="product-icon">🏠</div>
+      <div class="product-img-b2b">
+        <img src="{{ url_for('static', filename='casa_vacacional.jpg') }}" alt="Casa Vacacional"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="product-icon-fallback">🏠</div>
+      </div>
       <div class="product-title">{{ seller.servicio }}</div>
       <div class="product-sku">SKU: {{ seller.sku }}</div>
       <p class="product-desc">{{ seller.descripcion }}</p>
@@ -225,7 +263,7 @@
         {% endfor %}
       </div>
 
-      <form class="form-section" method="POST">
+      <form class="form-section" method="POST" action="/b2b">
         <input type="hidden" name="empresa_id" value="{{ empresa_id }}">
         <div class="form-title">Agregar colaborador al pedido</div>
 
@@ -276,7 +314,7 @@
           <span class="cart-total-label">Total pedido</span>
           <span class="cart-total-price">${{ "{:,.0f}".format(total) }}</span>
         </div>
-        <a href="/checkout-b2b?empresa={{ empresa_id }}" class="btn-checkout">Generar Orden de Cobro →</a>
+        <a href="/checkout-b2b?empresa={{ empresa_id }}" class="btn-checkout">Comprar →</a>
         <a href="/limpiar" class="btn-clear">Vaciar pedido</a>
 
       {% else %}
@@ -301,6 +339,16 @@
     </div>
   </div>
 </footer>
+
+{% if carrito %}
+<div class="sticky-comprar">
+  <div class="sticky-comprar-total">
+    <small>Total pedido</small>
+    ${{ "{:,.0f}".format(total) }}
+  </div>
+  <a href="/checkout-b2b?empresa={{ empresa_id }}">Comprar →</a>
+</div>
+{% endif %}
 
 <script>
   const API = '/_v/affiliation/';

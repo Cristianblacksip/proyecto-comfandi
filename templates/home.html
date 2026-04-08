@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comfandi — Tienda en Línea</title>
+  <style>
+    :root {
+      --azul: #004691; --azul-dark: #003470; --azul-light: #e8f0fb;
+      --cian: #01bcdc; --verde: #97d700; --verde-dark: #82b900;
+      --fondo: #f4f7f9; --gris: #6b7280; --gris-light: #f0f2f5;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fff; color: #222; }
+
+    /* ══ TOP BAR ══ */
+    .top-bar {
+      background: var(--azul); color: #fff;
+      font-size: .72rem; font-weight: 600;
+      padding: 7px 5%;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .top-bar a { color: rgba(255,255,255,.8); text-decoration: none; margin-left: 16px; }
+    .top-bar a:hover { color: #fff; }
+
+    /* ══ MAIN NAV ══ */
+    .main-nav {
+      position: sticky; top: 0; z-index: 1000;
+      background: #fff;
+      box-shadow: 0 2px 12px rgba(0,0,0,.09);
+      padding: 0 5%;
+    }
+    .nav-inner {
+      display: flex; align-items: center; gap: 16px;
+      height: 64px;
+    }
+    .nav-logo img { height: 42px; display: block; }
+    .nav-search {
+      flex: 1; max-width: 520px;
+      display: flex; border: 1.5px solid #dde3ed; border-radius: 30px; overflow: hidden;
+    }
+    .nav-search input {
+      flex: 1; padding: 10px 16px; border: none; outline: none;
+      font-size: .88rem; background: #f9fafb;
+    }
+    .nav-search button {
+      padding: 10px 18px; background: var(--azul); border: none;
+      color: #fff; font-size: .88rem; cursor: pointer;
+    }
+    .nav-actions {
+      display: flex; align-items: center; gap: 12px; margin-left: auto;
+    }
+    .btn-b2b {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--azul); color: #fff;
+      padding: 9px 16px; border-radius: 25px;
+      font-size: .78rem; font-weight: 800;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: .2s; white-space: nowrap;
+    }
+    .btn-b2b:hover { background: var(--azul-dark); }
+    .nav-cart {
+      position: relative; text-decoration: none; color: var(--azul);
+      font-size: 1.5rem; display: flex; align-items: center;
+    }
+
+    /* ══ CATEGORY NAV ══ */
+    .cat-nav {
+      background: var(--fondo); border-bottom: 1px solid #e5eaf2;
+      padding: 0 5%; overflow-x: auto;
+    }
+    .cat-nav-inner {
+      display: flex; gap: 0; height: 44px; align-items: center;
+    }
+    .cat-link {
+      text-decoration: none; color: #444; font-size: .8rem; font-weight: 600;
+      padding: 0 18px; height: 100%;
+      display: flex; align-items: center; gap: 6px;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap; transition: .2s;
+    }
+    .cat-link:hover { color: var(--azul); border-color: var(--azul); }
+    .cat-link.active { color: var(--azul); border-color: var(--verde); font-weight: 800; }
+
+    /* ══ HERO BANNER ══ */
+    .hero {
+      background: linear-gradient(135deg, var(--azul) 0%, #0060c0 60%, var(--cian) 100%);
+      padding: 48px 5% 56px;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 16px;
+      position: relative; overflow: hidden;
+    }
+    .hero::after {
+      content: '';
+      position: absolute; right: -40px; top: -40px;
+      width: 340px; height: 340px;
+      background: radial-gradient(circle, rgba(1,188,220,.3) 0%, transparent 70%);
+      border-radius: 50%; pointer-events: none;
+    }
+    .hero-badge {
+      background: var(--verde); color: #fff;
+      font-size: .68rem; font-weight: 800; padding: 4px 14px;
+      border-radius: 20px; text-transform: uppercase; letter-spacing: .5px;
+    }
+    .hero h1 {
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
+      font-weight: 900; color: #fff; line-height: 1.2; max-width: 520px;
+    }
+    .hero p { font-size: .95rem; color: rgba(255,255,255,.85); max-width: 420px; line-height: 1.6; }
+    .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn-hero-primary {
+      background: var(--verde); color: #fff;
+      padding: 14px 28px; border-radius: 35px;
+      font-weight: 800; font-size: .9rem; text-decoration: none;
+      transition: .2s; display: inline-block;
+    }
+    .btn-hero-primary:hover { background: var(--verde-dark); transform: translateY(-1px); }
+    .btn-hero-secondary {
+      background: rgba(255,255,255,.15); color: #fff;
+      padding: 14px 28px; border-radius: 35px;
+      font-weight: 700; font-size: .9rem; text-decoration: none;
+      border: 2px solid rgba(255,255,255,.4); transition: .2s;
+    }
+    .btn-hero-secondary:hover { background: rgba(255,255,255,.25); }
+
+    /* ══ PROMO STRIP ══ */
+    .promo-strip {
+      background: var(--verde); padding: 12px 5%;
+      display: flex; justify-content: center; gap: 32px; flex-wrap: wrap;
+    }
+    .promo-item {
+      display: flex; align-items: center; gap: 7px;
+      color: #fff; font-size: .78rem; font-weight: 700;
+    }
+    .promo-item span { font-size: 1.1rem; }
+
+    /* ══ SECTION WRAPPER ══ */
+    .section { padding: 36px 5%; }
+    .section-header {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-bottom: 22px;
+    }
+    .section-title { font-size: 1.2rem; font-weight: 900; color: var(--azul); }
+    .section-link { font-size: .8rem; color: var(--cian); font-weight: 700; text-decoration: none; }
+    .section-link:hover { text-decoration: underline; }
+
+    /* ══ CATEGORY CARDS ══ */
+    .cat-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    @media (min-width: 768px) {
+      .cat-cards { grid-template-columns: repeat(6, 1fr); }
+    }
+    .cat-card {
+      background: var(--fondo); border-radius: 16px;
+      padding: 20px 8px; text-align: center;
+      text-decoration: none; color: var(--azul);
+      transition: .2s; border: 2px solid transparent;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .cat-card:hover { border-color: var(--cian); background: #fff; box-shadow: 0 4px 14px rgba(0,70,145,.1); transform: translateY(-2px); }
+    .cat-card-icon { font-size: 2rem; display: block; margin-bottom: 8px; }
+    .cat-card-name { font-size: .78rem; font-weight: 800; }
+
+    /* ══ PRODUCT GRID ══ */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+    }
+    /* En desktop mostrar las tarjetas duplicadas, en mobile ocultarlas */
+    .prod-card-desktop-only { display: none; }
+    @media (min-width: 900px) {
+      .prod-card-desktop-only { display: flex; }
+    }
+    .prod-card {
+      background: #fff; border-radius: 16px;
+      border: 1.5px solid #e8edf5;
+      overflow: hidden; transition: .2s;
+      display: flex; flex-direction: column;
+    }
+    .prod-card:hover { box-shadow: 0 8px 28px rgba(0,70,145,.12); transform: translateY(-3px); border-color: var(--cian); }
+    .prod-img-wrap {
+      background: var(--fondo); height: 180px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    .prod-img-wrap img { max-height: 140px; max-width: 90%; mix-blend-mode: multiply; }
+    .prod-badge {
+      position: absolute; top: 10px; left: 10px;
+      background: var(--verde); color: #fff;
+      font-size: .6rem; font-weight: 800; padding: 3px 9px;
+      border-radius: 10px; text-transform: uppercase;
+    }
+    .prod-body { padding: 14px; flex: 1; display: flex; flex-direction: column; }
+    .prod-sku { font-size: .6rem; color: #bbb; font-weight: 600; margin-bottom: 4px; }
+    .prod-name { font-size: .95rem; font-weight: 800; color: var(--azul); margin-bottom: 6px; line-height: 1.3; }
+    .prod-desc { font-size: .76rem; color: var(--gris); line-height: 1.55; flex: 1; margin-bottom: 12px; }
+    .prod-price-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 12px; }
+    .prod-price-from { font-size: .65rem; color: var(--gris); }
+    .prod-price { font-size: 1.15rem; font-weight: 900; color: var(--azul); }
+    .btn-prod {
+      display: block; background: var(--azul); color: #fff;
+      text-align: center; padding: 11px; border-radius: 10px;
+      text-decoration: none; font-weight: 800; font-size: .82rem;
+      transition: .2s;
+    }
+    .btn-prod:hover { background: var(--azul-dark); }
+
+    /* ══ BANNER DOBLE ══ */
+    .banner-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .banner-card {
+      border-radius: 18px; padding: 28px 24px;
+      display: flex; flex-direction: column; gap: 10px;
+      min-height: 160px; position: relative; overflow: hidden;
+    }
+    .banner-card.primary { background: linear-gradient(135deg, var(--azul), #0060c0); color: #fff; }
+    .banner-card.secondary { background: linear-gradient(135deg, var(--verde-dark), var(--verde)); color: #fff; }
+    .banner-tag {
+      font-size: .62rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .6px; opacity: .8;
+    }
+    .banner-title { font-size: 1.05rem; font-weight: 900; line-height: 1.3; }
+    .banner-sub { font-size: .75rem; opacity: .85; }
+    .banner-btn {
+      margin-top: auto;
+      display: inline-block; background: rgba(255,255,255,.2);
+      border: 1.5px solid rgba(255,255,255,.5); color: #fff;
+      padding: 8px 18px; border-radius: 20px;
+      font-size: .75rem; font-weight: 800; text-decoration: none;
+      width: fit-content; transition: .2s;
+    }
+    .banner-btn:hover { background: rgba(255,255,255,.35); }
+    .banner-deco {
+      position: absolute; right: -20px; bottom: -20px;
+      font-size: 6rem; opacity: .12; pointer-events: none;
+    }
+
+    /* ══ CONFIANZA ══ */
+    .trust-strip {
+      background: var(--fondo); padding: 28px 5%;
+      display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;
+    }
+    .trust-item {
+      display: flex; align-items: center; gap: 10px;
+      font-size: .82rem; color: #444; font-weight: 600;
+    }
+    .trust-icon { font-size: 1.6rem; }
+    .trust-item strong { display: block; font-size: .9rem; color: var(--azul); }
+
+    /* ══ FOOTER ══ */
+    footer {
+      background: var(--azul); color: #fff;
+      padding: 40px 5% 24px;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 28px; margin-bottom: 32px;
+    }
+    .footer-col h4 { font-size: .85rem; font-weight: 800; margin-bottom: 12px; opacity: .9; }
+    .footer-col a {
+      display: block; color: rgba(255,255,255,.65);
+      font-size: .78rem; text-decoration: none; margin-bottom: 7px;
+    }
+    .footer-col a:hover { color: #fff; }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,.15);
+      padding-top: 18px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 8px;
+      font-size: .7rem; opacity: .6;
+    }
+
+    /* ══ MODAL B2B LOGIN ══ */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.55); z-index: 9999;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: #fff; border-radius: 22px;
+      width: 100%; max-width: 400px;
+      box-shadow: 0 24px 64px rgba(0,0,0,.25);
+      overflow: hidden; animation: slideUp .25s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    .modal-header {
+      background: var(--azul); padding: 24px 24px 20px;
+      text-align: center;
+    }
+    .modal-logo {
+      background: rgba(255,255,255,.15); display: inline-block;
+      padding: 10px 16px; border-radius: 12px; margin-bottom: 12px;
+    }
+    .modal-logo img { height: 36px; display: block; }
+    .modal-header h2 { color: #fff; font-size: .95rem; font-weight: 800; margin-bottom: 4px; }
+    .modal-header p  { color: rgba(255,255,255,.75); font-size: .75rem; }
+    .modal-body { padding: 24px; }
+    .m-label { font-size: .75rem; font-weight: 700; color: #444; display: block; margin-bottom: 6px; }
+    .m-input {
+      width: 100%; padding: 13px 14px; border: 1.5px solid #dde3ed; border-radius: 10px;
+      font-size: 1rem; margin-bottom: 14px; transition: .2s;
+    }
+    .m-input:focus { outline: none; border-color: var(--cian); box-shadow: 0 0 0 3px rgba(1,188,220,.12); }
+    .m-error {
+      background: #fff5f5; border: 1.5px solid #feb2b2; border-radius: 8px;
+      padding: 9px 12px; margin-bottom: 14px;
+      font-size: .76rem; font-weight: 600; color: #c53030;
+    }
+    .btn-modal-login {
+      width: 100%; padding: 14px; background: var(--azul); color: #fff;
+      border: none; border-radius: 35px; font-weight: 800; font-size: .9rem;
+      cursor: pointer; transition: .2s;
+    }
+    .btn-modal-login:hover { background: var(--azul-dark); }
+    .modal-close-btn {
+      display: block; text-align: center; margin-top: 12px;
+      color: var(--gris); font-size: .75rem; cursor: pointer;
+      background: none; border: none; width: 100%; padding: 6px;
+    }
+    .modal-close-btn:hover { color: var(--azul); }
+
+    /* ══ RESPONSIVE ══ */
+    @media (max-width: 600px) {
+      .top-bar .top-right { display: none; }
+      .cat-nav { display: none; }
+      .banner-grid { grid-template-columns: 1fr; }
+      .trust-strip { gap: 20px; }
+    }
+    @media (min-width: 900px) {
+      .hero { flex-direction: row; align-items: center; padding: 64px 5%; }
+      .hero-content { flex: 1; }
+      .hero-visual { flex: 0 0 auto; font-size: 8rem; opacity: .25; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ TOP BAR ══ -->
+<div class="top-bar">
+  <span>Caja de Compensación Familiar del Valle del Cauca</span>
+  <span class="top-right">
+    <a href="#">Mis pedidos</a>
+    <a href="#">Ayuda</a>
+    <a href="#">PQR</a>
+  </span>
+</div>
+
+<!-- ══ MAIN NAV ══ -->
+<nav class="main-nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Comfandi">
+    </a>
+    <div class="nav-search">
+      <input type="text" placeholder="Buscar vacunas, kits, servicios…">
+      <button>🔍</button>
+    </div>
+    <div class="nav-actions">
+      <button class="btn-b2b" onclick="openB2BModal()">
+        🏢 Portal Empresarial
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ CATEGORY NAV ══ -->
+<div class="cat-nav">
+  <div class="cat-nav-inner">
+    <a href="/" class="cat-link active">🏠 Inicio</a>
+    <a href="/vacunas" class="cat-link">💉 Vacunas</a>
+    <a href="/kit-salud" class="cat-link">🩹 Kits de Salud</a>
+    <a href="#" class="cat-link">💊 Medicamentos</a>
+    <a href="#" class="cat-link">🧪 Laboratorio</a>
+    <a href="#" class="cat-link">🏋️ Bienestar</a>
+    <a href="#" class="cat-link">🏥 IPS Comfandi</a>
+  </div>
+</div>
+
+<!-- ══ HERO BANNER ══ -->
+<section class="hero">
+  <div class="hero-content">
+    <span class="hero-badge">✨ Nuevos productos 2026</span>
+    <h1>Tu salud,<br>nuestro compromiso</h1>
+    <p>Accede a vacunas, kits de primeros auxilios y servicios de salud con precios según tu categoría de afiliación Comfandi.</p>
+    <div class="hero-btns">
+      <a href="/vacunas" class="btn-hero-primary">Ver productos</a>
+      <a href="#productos" class="btn-hero-secondary">Conocer más</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PROMO STRIP ══ -->
+<div class="promo-strip">
+  <div class="promo-item"><span>🚚</span> Envío gratis en pedidos +$100.000</div>
+  <div class="promo-item"><span>🔒</span> Pago 100% seguro</div>
+  <div class="promo-item"><span>💳</span> Precio según tu categoría</div>
+  <div class="promo-item"><span>📞</span> Soporte 24/7</div>
+</div>
+
+<!-- ══ CATEGORÍAS ══ -->
+<section class="section">
+  <div class="section-header">
+    <h2 class="section-title">Categorías</h2>
+  </div>
+  <div class="cat-cards">
+    <a href="/vacunas" class="cat-card">
+      <span class="cat-card-icon">💉</span>
+      <span class="cat-card-name">Vacunas</span>
+    </a>
+    <a href="/kit-salud" class="cat-card">
+      <span class="cat-card-icon">🩹</span>
+      <span class="cat-card-name">Kits de Salud</span>
+    </a>
+    <a href="#" class="cat-card">
+      <span class="cat-card-icon">💊</span>
+      <span class="cat-card-name">Medicamentos</span>
+    </a>
+    <a href="#" class="cat-card">
+      <span class="cat-card-icon">🧪</span>
+      <span class="cat-card-name">Laboratorio</span>
+    </a>
+    <a href="#" class="cat-card">
+      <span class="cat-card-icon">🏋️</span>
+      <span class="cat-card-name">Bienestar</span>
+    </a>
+    <a href="#" class="cat-card">
+      <span class="cat-card-icon">🏥</span>
+      <span class="cat-card-name">IPS Comfandi</span>
+    </a>
+  </div>
+</section>
+
+<!-- ══ PRODUCTOS DESTACADOS ══ -->
+<section class="section" id="productos" style="background: var(--fondo);">
+  <div class="section-header">
+    <h2 class="section-title">Productos destacados</h2>
+    <a href="/vacunas" class="section-link">Ver todos →</a>
+  </div>
+  <div class="product-grid">
+
+    <!-- Vacuna -->
+    <div class="prod-card">
+      <div class="prod-img-wrap">
+        <img src="{{ url_for('static', filename='vacuna.png') }}" alt="Vacuna Influenza">
+        <span class="prod-badge">{{ productos.vacuna.badge }}</span>
+      </div>
+      <div class="prod-body">
+        <div class="prod-sku">SKU: {{ productos.vacuna.sku }}</div>
+        <div class="prod-name">{{ productos.vacuna.nombre }}</div>
+        <p class="prod-desc">{{ productos.vacuna.descripcion }}</p>
+        <div class="prod-price-row">
+          <span class="prod-price-from">Desde</span>
+          <span class="prod-price">${{ "{:,.0f}".format(productos.vacuna.precios.A) }}</span>
+        </div>
+        <a href="/vacunas" class="btn-prod">Comprar →</a>
+      </div>
+    </div>
+
+    <!-- Kit Salud -->
+    <div class="prod-card">
+      <div class="prod-img-wrap">
+        <img src="{{ url_for('static', filename='kit.jpg') }}" alt="Kit Primeros Auxilios">
+        <span class="prod-badge" style="background:var(--cian);">{{ productos.kit.badge }}</span>
+      </div>
+      <div class="prod-body">
+        <div class="prod-sku">SKU: {{ productos.kit.sku }}</div>
+        <div class="prod-name">{{ productos.kit.nombre }}</div>
+        <p class="prod-desc">{{ productos.kit.descripcion }}</p>
+        <div class="prod-price-row">
+          <span class="prod-price-from">Desde</span>
+          <span class="prod-price">${{ "{:,.0f}".format(productos.kit.precios.A) }}</span>
+        </div>
+        <a href="/kit-salud" class="btn-prod">Comprar →</a>
+      </div>
+    </div>
+
+    <!-- Duplicados solo desktop -->
+    <div class="prod-card prod-card-desktop-only">
+      <div class="prod-img-wrap">
+        <img src="{{ url_for('static', filename='vacuna.png') }}" alt="Vacuna Influenza">
+        <span class="prod-badge">{{ productos.vacuna.badge }}</span>
+      </div>
+      <div class="prod-body">
+        <div class="prod-sku">SKU: {{ productos.vacuna.sku }}</div>
+        <div class="prod-name">{{ productos.vacuna.nombre }}</div>
+        <p class="prod-desc">{{ productos.vacuna.descripcion }}</p>
+        <div class="prod-price-row">
+          <span class="prod-price-from">Desde</span>
+          <span class="prod-price">${{ "{:,.0f}".format(productos.vacuna.precios.A) }}</span>
+        </div>
+        <a href="/vacunas" class="btn-prod">Comprar →</a>
+      </div>
+    </div>
+
+    <div class="prod-card prod-card-desktop-only">
+      <div class="prod-img-wrap">
+        <img src="{{ url_for('static', filename='kit.jpg') }}" alt="Kit Primeros Auxilios">
+        <span class="prod-badge" style="background:var(--cian);">{{ productos.kit.badge }}</span>
+      </div>
+      <div class="prod-body">
+        <div class="prod-sku">SKU: {{ productos.kit.sku }}</div>
+        <div class="prod-name">{{ productos.kit.nombre }}</div>
+        <p class="prod-desc">{{ productos.kit.descripcion }}</p>
+        <div class="prod-price-row">
+          <span class="prod-price-from">Desde</span>
+          <span class="prod-price">${{ "{:,.0f}".format(productos.kit.precios.A) }}</span>
+        </div>
+        <a href="/kit-salud" class="btn-prod">Comprar →</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ BANNERS DOBLES ══ -->
+<section class="section">
+  <div class="banner-grid">
+    <div class="banner-card primary">
+      <span class="banner-tag">Campaña 2026</span>
+      <div class="banner-title">Vacúnate contra la Influenza</div>
+      <div class="banner-sub">Protección para toda la familia. Precios exclusivos para afiliados.</div>
+      <a href="/vacunas" class="banner-btn">Ver campaña →</a>
+      <span class="banner-deco">💉</span>
+    </div>
+    <div class="banner-card secondary">
+      <span class="banner-tag">Esencial</span>
+      <div class="banner-title">Kit de Primeros Auxilios Premium</div>
+      <div class="banner-sub">Preparado para cualquier emergencia. Certificado por IPS Comfandi.</div>
+      <a href="/kit-salud" class="banner-btn">Ver producto →</a>
+      <span class="banner-deco">🩹</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CONFIANZA ══ -->
+<div class="trust-strip">
+  <div class="trust-item">
+    <span class="trust-icon">🏆</span>
+    <div><strong>+60 años</strong> de experiencia en salud</div>
+  </div>
+  <div class="trust-item">
+    <span class="trust-icon">👨‍⚕️</span>
+    <div><strong>IPS certificada</strong> por Supersalud</div>
+  </div>
+  <div class="trust-item">
+    <span class="trust-icon">💰</span>
+    <div><strong>Precio justo</strong> según tu afiliación</div>
+  </div>
+  <div class="trust-item">
+    <span class="trust-icon">📦</span>
+    <div><strong>Entrega rápida</strong> en el Valle del Cauca</div>
+  </div>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-col">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Comfandi" style="height:36px; margin-bottom:12px; opacity:.85;">
+      <p style="font-size:.76rem; color:rgba(255,255,255,.6); line-height:1.7;">
+        Caja de Compensación Familiar del Valle del Cauca.<br>NIT 890.399.010-1
+      </p>
+    </div>
+    <div class="footer-col">
+      <h4>Productos</h4>
+      <a href="/vacunas">Vacunas</a>
+      <a href="/kit-salud">Kit de Primeros Auxilios</a>
+      <a href="#">Medicamentos</a>
+      <a href="#">Laboratorio</a>
+    </div>
+    <div class="footer-col">
+      <h4>Comfandi</h4>
+      <a href="#">Quiénes somos</a>
+      <a href="#">IPS Comfandi</a>
+      <a href="#">Afíliate</a>
+      <a href="#">Sucursales</a>
+    </div>
+    <div class="footer-col">
+      <h4>Soporte</h4>
+      <a href="#">Centro de ayuda</a>
+      <a href="#">PQR</a>
+      <a href="#">Términos y condiciones</a>
+      <a href="#">Política de privacidad</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2026 Comfandi. Vigilado por Supersalud.</span>
+    <span>Desarrollado por Blacksip</span>
+  </div>
+</footer>
+
+<!-- ══ MODAL B2B LOGIN ══ -->
+<div class="modal-overlay" id="b2bModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-logo">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Comfandi">
+      </div>
+      <h2>Portal Empresarial B2B</h2>
+      <p>Acceso exclusivo para empresas afiliadas</p>
+    </div>
+    <div class="modal-body">
+      <div id="modal-error" class="m-error" style="display:none;"></div>
+      <label class="m-label">Contraseña de acceso empresarial</label>
+      <input class="m-input" type="password" id="modalPassword" placeholder="Ingresa la contraseña" onkeydown="if(event.key==='Enter') doB2BLogin()">
+      <button class="btn-modal-login" onclick="doB2BLogin()">Ingresar al Portal B2B →</button>
+      <button class="modal-close-btn" onclick="closeB2BModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openB2BModal() {
+    document.getElementById('b2bModal').classList.add('open');
+    setTimeout(() => document.getElementById('modalPassword').focus(), 100);
+  }
+  function closeB2BModal() {
+    document.getElementById('b2bModal').classList.remove('open');
+    document.getElementById('modalPassword').value = '';
+    document.getElementById('modal-error').style.display = 'none';
+  }
+  document.getElementById('b2bModal').addEventListener('click', function(e) {
+    if (e.target === this) closeB2BModal();
+  });
+
+  function doB2BLogin() {
+    const pw = document.getElementById('modalPassword').value;
+    if (!pw) return;
+    fetch('/b2b/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'password=' + encodeURIComponent(pw),
+      redirect: 'follow'
+    }).then(resp => {
+      if (resp.ok && resp.url.includes('/b2b')) {
+        window.location.href = resp.url;
+      } else if (resp.redirected && !resp.url.includes('/b2b/login')) {
+        window.location.href = resp.url;
+      } else {
+        return resp.text().then(() => {
+          document.getElementById('modal-error').textContent = 'Contraseña incorrecta. Inténtalo de nuevo.';
+          document.getElementById('modal-error').style.display = 'block';
+          document.getElementById('modalPassword').value = '';
+          document.getElementById('modalPassword').focus();
+        });
+      }
+    }).catch(() => {
+      fetch('/b2b/check-auth').then(r => r.json()).then(d => {
+        if (d.authenticated) window.location.href = '/b2b';
+      });
+    });
+  }
+</script>
+</body>
+</html>

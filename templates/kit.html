@@ -82,6 +82,24 @@
     .btn-pay:active { background: var(--azul-dark); }
     .btn-clear { display: block; text-align: center; margin-top: 8px; color: #ccc; text-decoration: none; font-size: .7rem; font-weight: 600; }
 
+    .sticky-comprar { display: none; }
+    @media (max-width: 899px) {
+      .sticky-comprar {
+        display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 500;
+        background: #fff; padding: 12px 16px;
+        box-shadow: 0 -4px 16px rgba(0,0,0,.12);
+        gap: 10px; align-items: center;
+      }
+      .sticky-comprar-total { font-size: .78rem; font-weight: 800; color: var(--azul); white-space: nowrap; }
+      .sticky-comprar-total small { display: block; font-size: .62rem; color: var(--gris); font-weight: 400; }
+      .sticky-comprar a {
+        flex: 1; display: flex; align-items: center; justify-content: center;
+        background: var(--azul); color: #fff; text-decoration: none;
+        padding: 14px; border-radius: 35px; font-weight: 800; font-size: .9rem; min-height: 50px;
+      }
+      .cart-panel { padding-bottom: 80px; }
+    }
+
     footer { background: var(--azul); color: #fff; padding: 28px 16px; text-align: center; }
     footer p { font-size: .72rem; opacity: .75; }
 
@@ -235,5 +253,15 @@
     }, 400);
   });
 </script>
+
+{% if carrito %}
+<div class="sticky-comprar">
+  <div class="sticky-comprar-total">
+    <small>Total carrito</small>
+    ${{ "{:,.0f}".format(total) }}
+  </div>
+  <a href="/checkout-b2c">Finalizar compra →</a>
+</div>
+{% endif %}
 </body>
 </html>

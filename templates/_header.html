@@ -1,15 +1,8 @@
-<!-- ════════════════════════════════════════════════
-     HEADER COMPARTIDO — Mobile First
-     Variables esperadas en el contexto Jinja2:
-       portal   → 'b2b' | 'b2c'
-       empresa  → objeto empresa (solo B2B)
-       empresa_id → string (solo B2B)
-       companies → dict (solo B2B index)
-     ════════════════════════════════════════════════ -->
+<!-- Header compartido para páginas de producto B2C y portal B2B -->
 <header class="site-header">
 
-  <!-- Top utility bar (solo desktop) -->
-  <div class="top-bar">
+  <!-- Top utility bar -->
+  <div class="top-bar-nav">
     <div class="top-bar-links">
       <span>PERSONAS</span><span>EMPRESAS</span><span>AFÍLIATE</span>
     </div>
@@ -24,24 +17,37 @@
       </a>
     </div>
 
-    <!-- Portal tabs — always visible -->
+    <!-- Portal tabs -->
     <nav class="portal-tabs" role="tablist">
       <a href="/"
-         class="portal-tab {% if portal == 'b2b' %}portal-tab--active portal-tab--b2b{% endif %}"
+         class="portal-tab {% if portal == 'b2c' %}portal-tab--active portal-tab--b2c{% endif %}"
+         role="tab">
+        <span class="tab-icon">🏠</span>
+        <span class="tab-label">B2C</span>
+      </a>
+      {% if portal == 'b2b' %}
+      <a href="/b2b"
+         class="portal-tab portal-tab--active portal-tab--b2b"
          role="tab">
         <span class="tab-icon">🏢</span>
         <span class="tab-label">Portal B2B</span>
       </a>
-      <a href="/vacunas"
-         class="portal-tab {% if portal == 'b2c' %}portal-tab--active portal-tab--b2c{% endif %}"
-         role="tab">
-        <span class="tab-icon">🛒</span>
-        <span class="tab-label">Portal B2C</span>
+      <a href="/b2b/logout" class="portal-tab portal-tab--logout" title="Cerrar sesión B2B">
+        <span class="tab-icon">🚪</span>
+        <span class="tab-label">Salir</span>
       </a>
+      {% else %}
+      <button type="button" onclick="openB2BModal()"
+         class="portal-tab portal-tab--b2b-btn"
+         role="tab">
+        <span class="tab-icon">🏢</span>
+        <span class="tab-label">Portal B2B</span>
+      </button>
+      {% endif %}
     </nav>
   </div>
 
-  <!-- Auth bar B2B (only shown when portal == 'b2b' and empresa is set) -->
+  <!-- Auth bar B2B -->
   {% if portal == 'b2b' and empresa is defined %}
   <div class="auth-bar">
     <div class="auth-info">
@@ -58,7 +64,7 @@
     {% if companies is defined %}
     <div class="company-switch">
       <label>Demo empresa:</label>
-      <select onchange="window.location='/?empresa='+this.value">
+      <select onchange="window.location='/b2b?empresa='+this.value">
         {% for cid, c in companies.items() %}
         <option value="{{ cid }}" {% if cid == empresa_id %}selected{% endif %}>{{ c.nombre }}</option>
         {% endfor %}
@@ -68,9 +74,10 @@
   </div>
   {% endif %}
 
-  <!-- Sub-nav B2C links -->
+  <!-- Sub-nav B2C -->
   {% if portal == 'b2c' %}
   <div class="subnav-b2c">
+    <a href="/" class="subnav-link {% if request.path == '/' %}subnav-link--active{% endif %}">🏠 Inicio</a>
     <a href="/vacunas" class="subnav-link {% if request.path == '/vacunas' %}subnav-link--active{% endif %}">💉 Vacunas</a>
     <a href="/kit-salud" class="subnav-link {% if request.path == '/kit-salud' %}subnav-link--active{% endif %}">🩹 Kit Salud</a>
   </div>
@@ -78,149 +85,168 @@
 
 </header>
 
-<style>
-/* ══════════════════════════════════════════
-   HEADER STYLES — Mobile First
-   ══════════════════════════════════════════ */
+<!-- Modal B2B Login (para páginas B2C) -->
+{% if portal == 'b2c' %}
+<div class="modal-overlay" id="b2bModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-logo-wrap">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Comfandi">
+      </div>
+      <h2>Portal Empresarial B2B</h2>
+      <p>Acceso exclusivo para empresas afiliadas</p>
+    </div>
+    <div class="modal-body">
+      <div id="modal-error" class="m-error" style="display:none;"></div>
+      <label class="m-label">Contraseña de acceso empresarial</label>
+      <input class="m-input" type="password" id="modalPassword" placeholder="Ingresa la contraseña"
+             onkeydown="if(event.key==='Enter') doB2BLogin()">
+      <button class="btn-modal-login" onclick="doB2BLogin()">Ingresar al Portal B2B →</button>
+      <button class="modal-close-btn" onclick="closeB2BModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+{% endif %}
 
+<style>
+/* ══════════════════════════════════════
+   HEADER STYLES
+   ══════════════════════════════════════ */
 .site-header {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+  position: sticky; top: 0; z-index: 1000;
   background: #fff;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.09);
+  box-shadow: 0 2px 12px rgba(0,0,0,.09);
 }
 
-/* Top bar — hidden on mobile, shown on desktop */
-.top-bar {
+.top-bar-nav {
   display: none;
-  background: var(--azul);
-  color: #fff;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0 5%;
-  height: 36px;
-  align-items: center;
-  justify-content: space-between;
+  background: var(--azul); color: #fff;
+  font-size: .7rem; font-weight: 700;
+  padding: 0 5%; height: 36px;
+  align-items: center; justify-content: space-between;
 }
 .top-bar-links { display: flex; gap: 18px; opacity: .85; }
 .top-bar-domain { opacity: .65; }
 
-/* Main header row */
 .header-main {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  gap: 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; gap: 12px;
 }
-
-/* Logo */
 .logo-wrap { flex-shrink: 0; }
 .logo-img { height: 40px; display: block; }
 
-/* Portal tabs */
-.portal-tabs {
-  display: flex;
-  gap: 6px;
-  flex: 1;
-  justify-content: flex-end;
-}
+.portal-tabs { display: flex; gap: 6px; flex: 1; justify-content: flex-end; }
 
 .portal-tab {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-size: 0.78rem;
-  font-weight: 800;
-  text-decoration: none;
-  color: var(--gris);
-  border: 2px solid #e5eaf2;
-  transition: all .2s;
-  white-space: nowrap;
+  display: flex; align-items: center; gap: 5px;
+  padding: 8px 14px; border-radius: 10px;
+  font-size: .78rem; font-weight: 800;
+  text-decoration: none; color: var(--gris);
+  border: 2px solid #e5eaf2; transition: all .2s;
+  white-space: nowrap; background: none; cursor: pointer;
+  font-family: inherit;
 }
 .portal-tab:hover { border-color: var(--cian); color: var(--azul); }
 
-.portal-tab--active.portal-tab--b2b {
-  background: var(--azul);
-  border-color: var(--azul);
-  color: #fff;
-}
-.portal-tab--active.portal-tab--b2c {
-  background: var(--verde);
-  border-color: var(--verde);
-  color: #fff;
-}
+.portal-tab--active.portal-tab--b2b { background: var(--azul); border-color: var(--azul); color: #fff; }
+.portal-tab--active.portal-tab--b2c { background: var(--verde); border-color: var(--verde); color: #fff; }
+.portal-tab--b2b-btn:hover { background: var(--azul); border-color: var(--azul); color: #fff; }
+.portal-tab--logout { border-color: #fde8e8; color: #e53e3e; }
+.portal-tab--logout:hover { background: #fde8e8; border-color: #e53e3e; }
 
 .tab-icon { font-size: 1rem; }
-.tab-label { display: none; } /* hidden on smallest screens */
+.tab-label { display: none; }
 
 /* Auth bar B2B */
 .auth-bar {
-  background: #eef4ff;
-  border-top: 1px solid #d5e3f7;
+  background: #eef4ff; border-top: 1px solid #d5e3f7;
   padding: 8px 16px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px;
 }
-.auth-info {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  flex-wrap: wrap;
-}
+.auth-info { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
 .auth-avatar {
-  width: 32px; height: 32px;
-  background: var(--azul);
-  border-radius: 50%;
-  color: #fff;
-  font-size: .9rem;
-  font-weight: 900;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+  width: 32px; height: 32px; background: var(--azul);
+  border-radius: 50%; color: #fff; font-size: .9rem; font-weight: 900;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 .auth-text strong { display: block; font-size: .82rem; color: var(--azul); }
 .auth-text span   { font-size: .68rem; color: var(--gris); }
 .session-dot { font-size: .65rem; font-weight: 800; color: #16a34a; background: #dcfce7; padding: 2px 8px; border-radius: 10px; }
-
 .company-switch { display: flex; align-items: center; gap: 6px; }
 .company-switch label { font-size: .7rem; color: var(--gris); font-weight: 600; }
 .company-switch select { border: 1px solid #c5d5ef; border-radius: 7px; padding: 4px 8px; font-size: .72rem; color: var(--azul); font-weight: 700; background: #fff; }
 
 /* Sub-nav B2C */
 .subnav-b2c {
-  background: #f8fbff;
-  border-top: 1px solid #eef0f5;
-  padding: 8px 16px;
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
+  background: #f8fbff; border-top: 1px solid #eef0f5;
+  padding: 8px 16px; display: flex; gap: 6px; overflow-x: auto;
 }
 .subnav-link {
-  text-decoration: none;
-  font-size: .75rem;
-  font-weight: 700;
-  color: var(--azul);
-  padding: 6px 14px;
-  border-radius: 20px;
-  white-space: nowrap;
-  transition: .2s;
+  text-decoration: none; font-size: .75rem; font-weight: 700;
+  color: var(--azul); padding: 6px 14px; border-radius: 20px;
+  white-space: nowrap; transition: .2s;
 }
 .subnav-link:hover { background: #e8f4ff; }
 .subnav-link--active { background: var(--verde); color: #fff; }
 
-/* ── BREAKPOINTS ── */
-@media (min-width: 480px) {
-  .tab-label { display: inline; }
+/* Modal */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.55); z-index: 9999;
+  align-items: center; justify-content: center; padding: 20px;
 }
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: #fff; border-radius: 22px;
+  width: 100%; max-width: 400px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.25);
+  overflow: hidden; animation: slideUp .25s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.modal-header {
+  background: var(--azul); padding: 24px 24px 20px; text-align: center;
+}
+.modal-logo-wrap {
+  background: rgba(255,255,255,.15); display: inline-block;
+  padding: 10px 16px; border-radius: 12px; margin-bottom: 12px;
+}
+.modal-logo-wrap img { height: 36px; display: block; }
+.modal-header h2 { color: #fff; font-size: .95rem; font-weight: 800; margin-bottom: 4px; }
+.modal-header p  { color: rgba(255,255,255,.75); font-size: .75rem; }
+.modal-body { padding: 24px; }
+.m-label { font-size: .75rem; font-weight: 700; color: #444; display: block; margin-bottom: 6px; }
+.m-input {
+  width: 100%; padding: 13px 14px; border: 1.5px solid #dde3ed; border-radius: 10px;
+  font-size: 1rem; margin-bottom: 14px; transition: .2s;
+}
+.m-input:focus { outline: none; border-color: var(--cian); box-shadow: 0 0 0 3px rgba(1,188,220,.12); }
+.m-error {
+  background: #fff5f5; border: 1.5px solid #feb2b2; border-radius: 8px;
+  padding: 9px 12px; margin-bottom: 14px;
+  font-size: .76rem; font-weight: 600; color: #c53030;
+}
+.btn-modal-login {
+  width: 100%; padding: 14px; background: var(--azul); color: #fff;
+  border: none; border-radius: 35px; font-weight: 800; font-size: .9rem;
+  cursor: pointer; transition: .2s; font-family: inherit;
+}
+.btn-modal-login:hover { background: var(--azul-dark); }
+.modal-close-btn {
+  display: block; text-align: center; margin-top: 12px;
+  color: var(--gris); font-size: .75rem; cursor: pointer;
+  background: none; border: none; width: 100%; padding: 6px;
+  font-family: inherit;
+}
+.modal-close-btn:hover { color: var(--azul); }
 
+/* Breakpoints */
+@media (min-width: 480px) { .tab-label { display: inline; } }
 @media (min-width: 768px) {
-  .top-bar { display: flex; }
+  .top-bar-nav { display: flex; }
   .header-main { padding: 10px 5%; }
   .logo-img { height: 48px; }
   .portal-tab { padding: 9px 20px; font-size: .83rem; }
@@ -228,3 +254,42 @@
   .subnav-b2c { padding: 8px 5%; }
 }
 </style>
+
+{% if portal == 'b2c' %}
+<script>
+function openB2BModal() {
+  document.getElementById('b2bModal').classList.add('open');
+  setTimeout(() => document.getElementById('modalPassword').focus(), 100);
+}
+function closeB2BModal() {
+  document.getElementById('b2bModal').classList.remove('open');
+  document.getElementById('modalPassword').value = '';
+  document.getElementById('modal-error').style.display = 'none';
+}
+document.getElementById('b2bModal').addEventListener('click', function(e) {
+  if (e.target === this) closeB2BModal();
+});
+function doB2BLogin() {
+  const pw = document.getElementById('modalPassword').value;
+  if (!pw) return;
+  fetch('/b2b/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'password=' + encodeURIComponent(pw),
+    redirect: 'manual'
+  }).then(resp => {
+    if (resp.type === 'opaqueredirect' || resp.status === 302 || resp.ok) {
+      fetch('/b2b/check-auth').then(r => r.json()).then(d => {
+        if (d.authenticated) window.location.href = '/b2b';
+        else {
+          document.getElementById('modal-error').textContent = 'Contraseña incorrecta.';
+          document.getElementById('modal-error').style.display = 'block';
+          document.getElementById('modalPassword').value = '';
+          document.getElementById('modalPassword').focus();
+        }
+      });
+    }
+  });
+}
+</script>
+{% endif %}

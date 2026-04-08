@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Comfandi — Acceso eCommerce</title>
+  <title>Comfandi — Acceso Portal Empresarial B2B</title>
   <style>
     :root {
       --azul: #004691; --azul-dark: #003470;
@@ -19,56 +19,61 @@
       padding: 20px;
     }
 
-    /* Card */
+    .back-link {
+      position: fixed; top: 16px; left: 16px;
+      display: flex; align-items: center; gap: 6px;
+      color: rgba(255,255,255,.8); text-decoration: none;
+      font-size: .8rem; font-weight: 700;
+      background: rgba(255,255,255,.15); border: 1.5px solid rgba(255,255,255,.3);
+      padding: 8px 14px; border-radius: 20px; transition: .2s;
+    }
+    .back-link:hover { background: rgba(255,255,255,.25); color: #fff; }
+
     .login-card {
-      background: #fff;
-      border-radius: 24px;
+      background: #fff; border-radius: 24px;
       box-shadow: 0 20px 60px rgba(0,0,0,.25);
-      width: 100%; max-width: 400px;
-      overflow: hidden;
+      width: 100%; max-width: 400px; overflow: hidden;
     }
 
-    /* Header section */
     .card-header {
-      background: var(--azul);
-      padding: 32px 28px 24px;
-      text-align: center;
+      background: var(--azul); padding: 32px 28px 24px; text-align: center;
     }
     .logo-wrap {
-      background: var(--cian);
-      display: inline-block;
-      padding: 14px 20px;
-      border-radius: 14px;
-      margin-bottom: 18px;
+      background: rgba(255,255,255,.15); display: inline-block;
+      padding: 12px 18px; border-radius: 14px; margin-bottom: 16px;
     }
-    .logo-wrap img { height: 44px; display: block; }
-    .card-header h1 { font-size: 1.05rem; font-weight: 800; color: #fff; margin-bottom: 4px; }
+    .logo-wrap img { height: 40px; display: block; }
+
+    .portal-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,.12); border: 1.5px solid rgba(255,255,255,.25);
+      color: #fff; font-size: .72rem; font-weight: 800;
+      padding: 5px 14px; border-radius: 20px; margin-bottom: 14px;
+      text-transform: uppercase; letter-spacing: .4px;
+    }
+    .card-header h1 { font-size: 1.1rem; font-weight: 900; color: #fff; margin-bottom: 4px; }
     .card-header p  { font-size: .78rem; color: rgba(255,255,255,.75); }
 
-    /* Pills */
-    .portal-pills {
-      display: flex; justify-content: center; gap: 8px; margin-top: 14px;
-    }
-    .pill {
-      font-size: .68rem; font-weight: 800; padding: 4px 12px;
-      border-radius: 20px; border: 1.5px solid rgba(255,255,255,.3); color: #fff;
-    }
-    .pill.b2b { background: rgba(255,255,255,.15); }
-    .pill.b2c { background: var(--verde); border-color: var(--verde); }
-
-    /* Body */
     .card-body { padding: 28px; }
+
     .form-title {
       font-size: .72rem; font-weight: 800; text-transform: uppercase;
-      letter-spacing: .8px; color: var(--gris); margin-bottom: 16px;
+      letter-spacing: .8px; color: var(--gris); margin-bottom: 18px;
       display: flex; align-items: center; gap: 6px;
     }
     .form-title::before, .form-title::after {
       content: ''; flex: 1; height: 1px; background: #e5eaf2;
     }
 
+    .error-box {
+      background: #fff5f5; border: 1.5px solid #feb2b2; border-radius: 10px;
+      padding: 10px 13px; margin-bottom: 16px;
+      font-size: .78rem; font-weight: 600; color: #c53030;
+      display: flex; align-items: center; gap: 6px;
+    }
+
     .field-label { font-size: .75rem; font-weight: 700; color: #444; display: block; margin-bottom: 6px; }
-    .field-wrap { position: relative; }
+    .field-wrap  { position: relative; margin-bottom: 6px; }
     .field-input {
       width: 100%; padding: 14px 44px 14px 14px;
       border: 1.5px solid #dde3ed; border-radius: 12px;
@@ -84,54 +89,40 @@
       color: var(--gris); padding: 4px;
     }
 
-    /* Error */
-    .error-box {
-      background: #fff5f5; border: 1.5px solid #feb2b2; border-radius: 10px;
-      padding: 10px 13px; margin-bottom: 16px;
-      font-size: .78rem; font-weight: 600; color: #c53030;
-      display: flex; align-items: center; gap: 6px;
-    }
-
-    /* Submit */
     .btn-login {
       width: 100%; padding: 15px; margin-top: 18px;
-      background: var(--azul); color: #fff;
-      border: none; border-radius: 35px;
+      background: var(--azul); color: #fff; border: none; border-radius: 35px;
       font-weight: 800; font-size: .95rem; cursor: pointer;
-      transition: .2s; min-height: 52px; letter-spacing: .3px;
+      transition: .2s; min-height: 52px;
     }
     .btn-login:hover  { background: var(--azul-dark); transform: translateY(-1px); }
     .btn-login:active { transform: scale(.98); }
 
-    /* Footer note */
     .card-footer {
       background: #f9fafb; border-top: 1px solid #eee;
-      padding: 14px 28px; text-align: center;
+      padding: 16px 28px; text-align: center;
     }
-    .card-footer p { font-size: .68rem; color: #aaa; line-height: 1.6; }
+    .card-footer p { font-size: .7rem; color: #aaa; line-height: 1.7; }
     .card-footer a { color: var(--azul); font-weight: 700; text-decoration: none; }
+    .card-footer a:hover { text-decoration: underline; }
 
-    /* Outside text */
     .outside-note { margin-top: 20px; font-size: .72rem; color: rgba(255,255,255,.6); text-align: center; }
   </style>
 </head>
 <body>
 
+  <a href="/" class="back-link">← Volver a la tienda</a>
+
   <div class="login-card">
-    <!-- Header -->
     <div class="card-header">
       <div class="logo-wrap">
         <img src="{{ url_for('static', filename='logo.png') }}" alt="Comfandi">
       </div>
-      <h1>eCommerce Comfandi</h1>
-      <p>Plataforma de comercio electrónico — Ambiente de pruebas</p>
-      <div class="portal-pills">
-        <span class="pill b2b">🏢 Portal B2B</span>
-        <span class="pill b2c">🛒 Portal B2C</span>
-      </div>
+      <div class="portal-badge">🏢 Portal Empresarial</div>
+      <h1>Acceso B2B</h1>
+      <p>Ingresa la contraseña para acceder al marketplace empresarial</p>
     </div>
 
-    <!-- Body -->
     <div class="card-body">
       <div class="form-title">Acceso seguro</div>
 
@@ -139,26 +130,26 @@
       <div class="error-box">⚠️ {{ error }}</div>
       {% endif %}
 
-      <form method="POST" autocomplete="off">
-        <label class="field-label" for="password">Contraseña de acceso</label>
+      <form method="POST" action="/b2b/login" autocomplete="off">
+        <label class="field-label" for="password">Contraseña empresarial</label>
         <div class="field-wrap">
           <input class="field-input" type="password" id="password" name="password"
                  placeholder="Ingresa la contraseña" autofocus required>
           <button type="button" class="toggle-pw" onclick="togglePw()" title="Mostrar/ocultar">👁</button>
         </div>
-        <button type="submit" class="btn-login">Ingresar a la plataforma →</button>
+        <button type="submit" class="btn-login">Ingresar al Portal B2B →</button>
       </form>
     </div>
 
-    <!-- Footer -->
     <div class="card-footer">
-      <p>&copy; 2026 Comfandi · Vigilado Supersalud<br>
-        Caja de Compensación Familiar del Valle del Cauca
+      <p>
+        ¿No eres empresa? <a href="/">Ir a la tienda B2C</a><br>
+        &copy; 2026 Comfandi · Vigilado Supersalud
       </p>
     </div>
   </div>
 
-  <p class="outside-note">Acceso restringido — Solo personal autorizado</p>
+  <p class="outside-note">Acceso restringido — Solo empresas autorizadas</p>
 
   <script>
     function togglePw() {

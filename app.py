@@ -1,8 +1,8 @@
 import os
 import random
+from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 
-# Rutas absolutas para que Flask encuentre templates/static en cualquier contexto
 _BASE = os.path.dirname(os.path.abspath(__file__))
 
 app = Flask(
@@ -12,30 +12,15 @@ app = Flask(
 )
 app.secret_key = 'comfandi-blacksip-2026'
 
-PASSWORD = 'ComfandiBlacksip'
-PUBLIC_ROUTES = {'login', 'static'}
+B2B_PASSWORD = 'ComfandiBlacksip'
 
-@app.before_request
-def require_login():
-    if request.endpoint in PUBLIC_ROUTES:
-        return
-    if not session.get('authenticated'):
-        return redirect(url_for('login'))
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    error = None
-    if request.method == 'POST':
-        if request.form.get('password') == PASSWORD:
-            session['authenticated'] = True
-            return redirect(url_for('index'))
-        error = 'Contraseña incorrecta. Inténtalo de nuevo.'
-    return render_template('login.html', error=error)
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('login'))
+def b2b_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get('b2b_authenticated'):
+            return redirect(url_for('b2b_login'))
+        return f(*args, **kwargs)
+    return decorated
 
 # =============================================================================
 # MASTER DATA
@@ -104,6 +89,7 @@ INFO_PRODUCTOS = {
             "Aplicación en sedes IPS Comfandi. Incluye carnet de vacunación digital."
         ),
         "imagen": "vacuna.png",
+        "badge": "Nuevo 2026",
     },
     "kit": {
         "nombre": "Kit de Primeros Auxilios Premium",
@@ -112,11 +98,12 @@ INFO_PRODUCTOS = {
         "price_tables": {"A": "PRICE_A", "B": "PRICE_B", "C": "PRICE_C", "D": "PRICE_D"},
         "descripcion": "Kit completo para emergencias en el hogar o la oficina.",
         "imagen": "kit.jpg",
+        "badge": "Más vendido",
     },
 }
 
 # =============================================================================
-# Helpers para carritos en sesión (stateless-safe)
+# Helpers de carrito
 # =============================================================================
 
 def get_carrito(key):
@@ -165,78 +152,13 @@ def api_set_price_table():
     })
 
 # =============================================================================
-# RUTAS B2B
+# RUTAS B2C — Públicas
 # =============================================================================
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    empresa_id = request.args.get('empresa', 'CONSTRUCTORA_ABC')
-    if empresa_id not in B2B_COMPANIES:
-        empresa_id = 'CONSTRUCTORA_ABC'
-    empresa = B2B_COMPANIES[empresa_id]
+@app.route('/')
+def home():
+    return render_template('home.html', portal='b2c', productos=INFO_PRODUCTOS)
 
-    if request.method == 'POST':
-        doc = request.form.get('cedula', '').strip()
-        empresa_id_form = request.form.get('empresa_id', empresa_id)
-        info = B2B_COLLABORATORS.get(doc) or MASTER_DATA.get(doc)
-        if info:
-            nombre, cat = info['nombre'], info['categoria']
-        else:
-            nombre = request.form.get('nombre_manual', 'Colaborador Invitado')
-            cat = 'D'
-        add_to_carrito('carrito_b2b', {
-            "servicio": SELLER_B2B['servicio'],
-            "sku": SELLER_B2B['sku'],
-            "beneficiario": nombre,
-            "documento": doc,
-            "precio": SELLER_B2B['precios'][cat],
-            "categoria": cat,
-            "price_table": f"PRICE_{cat}",
-            "empresa_id": empresa_id_form,
-        })
-        return redirect(url_for('index', empresa=empresa_id_form))
-
-    carrito_b2b = get_carrito('carrito_b2b')
-    total = sum(i['precio'] for i in carrito_b2b)
-    return render_template('index.html',
-        carrito=carrito_b2b, total=total,
-        seller=SELLER_B2B, empresa=empresa,
-        empresa_id=empresa_id, companies=B2B_COMPANIES,
-        portal='b2b')
-
-
-@app.route('/checkout-b2b')
-def checkout_b2b():
-    empresa_id = request.args.get('empresa', 'CONSTRUCTORA_ABC')
-    empresa = B2B_COMPANIES.get(empresa_id, B2B_COMPANIES['CONSTRUCTORA_ABC'])
-    carrito_b2b = get_carrito('carrito_b2b')
-    total = sum(i['precio'] for i in carrito_b2b)
-    return render_template('checkout_b2b.html',
-        carrito=carrito_b2b, total=total,
-        seller=SELLER_B2B, empresa=empresa,
-        empresa_id=empresa_id, portal='b2b')
-
-
-@app.route('/confirmar-b2b', methods=['POST'])
-def confirmar_b2b():
-    empresa_id = request.form.get('empresa_id', 'CONSTRUCTORA_ABC')
-    empresa = B2B_COMPANIES.get(empresa_id, B2B_COMPANIES['CONSTRUCTORA_ABC'])
-    carrito_b2b = get_carrito('carrito_b2b')
-    orden = {
-        "id": f"ORD-B2B-{random.randint(100000, 999999)}",
-        "tipo": "B2B",
-        "empresa": empresa,
-        "seller": SELLER_B2B['nombre'],
-        "seller_nit": SELLER_B2B['nit'],
-        "items": list(carrito_b2b),
-        "total": sum(i['precio'] for i in carrito_b2b),
-    }
-    clear_carrito('carrito_b2b')
-    return render_template('orden_confirmada.html', orden=orden, portal='b2b')
-
-# =============================================================================
-# RUTAS B2C
-# =============================================================================
 
 @app.route('/vacunas', methods=['GET', 'POST'])
 def vacunas():
@@ -309,6 +231,104 @@ def confirmar_b2c():
     clear_carrito('carrito_b2c')
     return render_template('orden_confirmada.html', orden=orden, portal='b2c')
 
+# =============================================================================
+# RUTAS B2B — Requieren autenticación B2B
+# =============================================================================
+
+@app.route('/b2b/check-auth')
+def b2b_check_auth():
+    return jsonify({"authenticated": bool(session.get('b2b_authenticated'))})
+
+
+@app.route('/b2b/login', methods=['GET', 'POST'])
+def b2b_login():
+    if session.get('b2b_authenticated'):
+        return redirect(url_for('b2b_portal'))
+    error = None
+    if request.method == 'POST':
+        if request.form.get('password') == B2B_PASSWORD:
+            session['b2b_authenticated'] = True
+            return redirect(url_for('b2b_portal'))
+        error = 'Contraseña incorrecta. Inténtalo de nuevo.'
+    return render_template('login.html', error=error)
+
+
+@app.route('/b2b/logout')
+def b2b_logout():
+    session.pop('b2b_authenticated', None)
+    clear_carrito('carrito_b2b')
+    return redirect(url_for('home'))
+
+
+@app.route('/b2b', methods=['GET', 'POST'])
+@b2b_required
+def b2b_portal():
+    empresa_id = request.args.get('empresa', 'CONSTRUCTORA_ABC')
+    if empresa_id not in B2B_COMPANIES:
+        empresa_id = 'CONSTRUCTORA_ABC'
+    empresa = B2B_COMPANIES[empresa_id]
+
+    if request.method == 'POST':
+        doc = request.form.get('cedula', '').strip()
+        empresa_id_form = request.form.get('empresa_id', empresa_id)
+        info = B2B_COLLABORATORS.get(doc) or MASTER_DATA.get(doc)
+        if info:
+            nombre, cat = info['nombre'], info['categoria']
+        else:
+            nombre = request.form.get('nombre_manual', 'Colaborador Invitado')
+            cat = 'D'
+        add_to_carrito('carrito_b2b', {
+            "servicio": SELLER_B2B['servicio'],
+            "sku": SELLER_B2B['sku'],
+            "beneficiario": nombre,
+            "documento": doc,
+            "precio": SELLER_B2B['precios'][cat],
+            "categoria": cat,
+            "price_table": f"PRICE_{cat}",
+            "empresa_id": empresa_id_form,
+        })
+        return redirect(url_for('b2b_portal', empresa=empresa_id_form))
+
+    carrito_b2b = get_carrito('carrito_b2b')
+    total = sum(i['precio'] for i in carrito_b2b)
+    return render_template('index.html',
+        carrito=carrito_b2b, total=total,
+        seller=SELLER_B2B, empresa=empresa,
+        empresa_id=empresa_id, companies=B2B_COMPANIES,
+        portal='b2b')
+
+
+@app.route('/checkout-b2b')
+@b2b_required
+def checkout_b2b():
+    empresa_id = request.args.get('empresa', 'CONSTRUCTORA_ABC')
+    empresa = B2B_COMPANIES.get(empresa_id, B2B_COMPANIES['CONSTRUCTORA_ABC'])
+    carrito_b2b = get_carrito('carrito_b2b')
+    total = sum(i['precio'] for i in carrito_b2b)
+    return render_template('checkout_b2b.html',
+        carrito=carrito_b2b, total=total,
+        seller=SELLER_B2B, empresa=empresa,
+        empresa_id=empresa_id, portal='b2b')
+
+
+@app.route('/confirmar-b2b', methods=['POST'])
+@b2b_required
+def confirmar_b2b():
+    empresa_id = request.form.get('empresa_id', 'CONSTRUCTORA_ABC')
+    empresa = B2B_COMPANIES.get(empresa_id, B2B_COMPANIES['CONSTRUCTORA_ABC'])
+    carrito_b2b = get_carrito('carrito_b2b')
+    orden = {
+        "id": f"ORD-B2B-{random.randint(100000, 999999)}",
+        "tipo": "B2B",
+        "empresa": empresa,
+        "seller": SELLER_B2B['nombre'],
+        "seller_nit": SELLER_B2B['nit'],
+        "items": list(carrito_b2b),
+        "total": sum(i['precio'] for i in carrito_b2b),
+    }
+    clear_carrito('carrito_b2b')
+    return render_template('orden_confirmada.html', orden=orden, portal='b2b')
+
 
 @app.route('/limpiar')
 def limpiar():
@@ -317,7 +337,7 @@ def limpiar():
         clear_carrito('carrito_b2c')
     else:
         clear_carrito('carrito_b2b')
-    return redirect(ref or url_for('index'))
+    return redirect(ref or url_for('home'))
 
 
 if __name__ == '__main__':
