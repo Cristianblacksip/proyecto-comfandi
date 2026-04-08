@@ -223,10 +223,10 @@
       {% if carrito %}
       <form action="/confirmar-b2b" method="POST">
         <input type="hidden" name="empresa_id" value="{{ empresa_id }}">
-        <button type="submit" class="btn-confirm">Compraro →</button>
+        <button type="submit" class="btn-confirm">Comprar →</button>
       </form>
       {% else %}
-      <button class="btn-confirm" disabled>Compraro →</button>
+      <button class="btn-confirm" disabled>Comprar →</button>
       {% endif %}
       <a href="/b2b?empresa={{ empresa_id }}" class="btn-back">← Agregar más colaboradores</a>
       <p class="invoice-note">Se generará factura electrónica para<br><strong>{{ empresa.nombre }}</strong> al confirmar.</p>
