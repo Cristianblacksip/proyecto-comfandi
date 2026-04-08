@@ -3,104 +3,119 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Comfandi — Finalizar Compra B2C</title>
+  <title>Comfandi — Finalizar Compra</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <style>
-    :root {
-      --azul: #004691; --azul-dark: #003470;
-      --cian: #01bcdc; --verde: #97d700; --verde-dark: #82b900;
-      --fondo: #f4f7f9; --gris: #6b7280;
+    body { background: var(--bg-page); display: flex; flex-direction: column; min-height: 100vh; }
+
+    .page {
+      flex: 1; padding: 16px;
+      display: flex; flex-direction: column; gap: 16px;
+      max-width: 880px; margin: 0 auto; width: 100%;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--fondo); color: #222; min-height: 100vh; display: flex; flex-direction: column; }
 
-    .page { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 16px; max-width: 860px; margin: 0 auto; width: 100%; }
+    /* ── ORDER CARD ── */
+    .order-card { background: #fff; border-radius: var(--r-xl); box-shadow: var(--sh-sm); overflow: hidden; }
+    .order-card-hd {
+      background: linear-gradient(135deg, var(--azul) 0%, var(--azul-mid) 100%);
+      padding: 18px 20px;
+    }
+    .order-card-hd h2 { font-size: var(--ts-lg); font-weight: 900; color: #fff; margin-bottom: 3px; }
+    .order-card-hd p  { font-size: var(--ts-sm); color: rgba(255,255,255,.75); }
+    .order-body { padding: 8px 20px 20px; }
 
-    /* Steps */
-    .steps { display: flex; align-items: center; gap: 6px; padding: 12px 0 4px; overflow-x: auto; }
-    .step { font-size: .75rem; font-weight: 700; color: #bbb; white-space: nowrap; padding: 5px 10px; border-radius: 20px; }
-    .step.active { background: var(--verde); color: #fff; }
-    .step.done   { color: var(--verde-dark); }
-    .step-sep { color: #ddd; font-size: .8rem; flex-shrink: 0; }
-
-    /* Order card */
-    .order-card { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.07); overflow: hidden; }
-    .order-card-hd { background: var(--azul); padding: 16px; color: #fff; }
-    .order-card-hd h2 { font-size: 1rem; font-weight: 800; }
-    .order-card-hd p  { font-size: .72rem; opacity: .8; margin-top: 4px; }
-    .order-body { padding: 16px; }
-
-    /* Item rows (mobile: stacked) */
+    /* Order item */
     .order-item {
       display: grid;
       grid-template-columns: 1fr auto;
-      gap: 4px 12px;
-      padding: 14px 0;
-      border-bottom: 1px solid #f5f5f5;
+      gap: 2px 14px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
       align-items: start;
     }
-    .item-product { font-size: .62rem; color: #bbb; text-transform: uppercase; font-weight: 700; grid-column: 1; }
-    .item-sku     { font-size: .58rem; color: #ccc; grid-column: 1; margin-top: 1px; }
-    .item-ben     { font-size: .88rem; font-weight: 700; color: #333; grid-column: 1; }
-    .item-doc     { font-size: .66rem; color: #aaa; grid-column: 1; }
-    .item-tags    { display: flex; gap: 5px; flex-wrap: wrap; grid-column: 1; margin-top: 4px; }
-    .cat-tag      { font-size: .62rem; font-weight: 800; padding: 3px 8px; border-radius: 5px; }
-    .cat-A { background: #d1fae5; color: #065f46; }
-    .cat-B { background: #dbeafe; color: #1e40af; }
-    .cat-C { background: #fef3c7; color: #92400e; }
-    .cat-D { background: #f3f4f6; color: #6b7280; }
-    .pt-tag  { font-size: .6rem; font-weight: 700; color: var(--verde-dark); background: #f0ffe0; padding: 3px 7px; border-radius: 5px; }
-    .item-price { font-size: 1rem; font-weight: 800; color: var(--azul); text-align: right; grid-column: 2; grid-row: 1 / 6; align-self: center; }
+    .order-item:last-of-type { border-bottom: none; }
+    .item-product { font-size: var(--ts-xs); color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: .3px; grid-column: 1; }
+    .item-sku     { font-size: var(--ts-xs); color: #ccc; grid-column: 1; margin-top: 1px; font-family: monospace; }
+    .item-ben     { font-size: var(--ts-md); font-weight: 700; color: var(--text-primary); grid-column: 1; margin-top: 4px; }
+    .item-doc     { font-size: var(--ts-sm); color: var(--text-muted); grid-column: 1; }
+    .item-tags    { display: flex; gap: 6px; flex-wrap: wrap; grid-column: 1; margin-top: 6px; }
+    .item-price   {
+      font-size: var(--ts-xl); font-weight: 900; color: var(--azul);
+      text-align: right; grid-column: 2; grid-row: 1 / 6;
+      align-self: center; white-space: nowrap;
+    }
 
-    .total-section { display: flex; justify-content: space-between; align-items: center; background: var(--fondo); border-radius: 10px; padding: 14px; margin-top: 4px; }
-    .total-label { font-size: .8rem; font-weight: 700; color: var(--gris); text-transform: uppercase; }
-    .total-price { font-size: 1.4rem; font-weight: 900; color: var(--azul); }
+    .total-section {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--azul-50); border: 1.5px solid var(--azul-light);
+      border-radius: var(--r-lg); padding: 16px 18px; margin-top: 8px;
+    }
+    .total-section .total-label { font-size: var(--ts-sm); font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .4px; }
+    .total-section .total-price { font-size: var(--ts-3xl); font-weight: 900; color: var(--azul); }
 
-    /* Payload toggle */
+    /* Payload dev toggle */
     .payload-toggle {
-      width: 100%; background: none; border: 1.5px solid #e0e8f4;
-      border-radius: 10px; padding: 10px 14px; font-size: .75rem; font-weight: 700;
-      color: var(--azul); cursor: pointer; display: flex; justify-content: space-between;
-      align-items: center; margin-top: 14px;
+      width: 100%; background: none; border: 1.5px solid var(--border);
+      border-radius: var(--r-md); padding: 10px 14px; font-size: var(--ts-sm); font-weight: 700;
+      color: var(--text-secondary); cursor: pointer; display: flex; justify-content: space-between;
+      align-items: center; margin-top: 14px; font-family: var(--font); transition: all var(--t);
     }
-    .payload-box { display: none; background: #1e1e2e; border-radius: 10px; padding: 14px; margin-top: 8px; overflow-x: auto; }
-    .payload-box pre { font-size: .68rem; color: #a6e3a1; font-family: 'Courier New', monospace; line-height: 1.6; white-space: pre-wrap; }
+    .payload-toggle:hover { border-color: var(--azul); color: var(--azul); background: var(--azul-50); }
+    .payload-box { display: none; background: #1a1b2e; border-radius: var(--r-md); padding: 16px; margin-top: 8px; overflow-x: auto; }
+    .payload-box pre { font-size: 12px; color: #a6e3a1; font-family: 'Courier New', monospace; line-height: 1.65; white-space: pre-wrap; }
 
-    /* Empty state */
-    .empty-state { text-align: center; padding: 40px 20px; color: #ccc; }
-    .empty-icon { font-size: 3rem; display: block; margin-bottom: 10px; }
-    .empty-state a { color: var(--azul); font-weight: 700; text-decoration: none; font-size: .85rem; }
+    /* Empty */
+    .empty-state { text-align: center; padding: 48px 20px; }
+    .empty-icon  { font-size: 3.5rem; display: block; margin-bottom: 14px; }
+    .empty-title { font-size: var(--ts-lg); font-weight: 800; color: var(--text-secondary); margin-bottom: 8px; }
+    .empty-desc  { font-size: var(--ts-base); color: var(--text-muted); margin-bottom: 20px; }
 
-    /* Summary card */
-    .summary-card { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.07); overflow: hidden; }
-    .summary-hd { background: var(--verde); padding: 14px 16px; color: #fff; }
-    .summary-hd h3 { font-size: .88rem; font-weight: 800; }
-    .summary-body { padding: 14px 16px; }
-    .summary-line { display: flex; justify-content: space-between; font-size: .8rem; margin-bottom: 10px; color: var(--gris); }
-    .summary-line strong { color: #333; }
-    .summary-total { display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #f0f0f0; padding-top: 12px; margin-top: 4px; }
-    .st-label { font-size: .78rem; font-weight: 700; text-transform: uppercase; color: var(--gris); }
-    .st-price { font-size: 1.3rem; font-weight: 900; color: var(--azul); }
+    /* ── SUMMARY SIDEBAR ── */
+    .summary-card { background: #fff; border-radius: var(--r-xl); box-shadow: var(--sh-sm); overflow: hidden; }
+    .summary-hd { background: var(--verde); padding: 16px 18px; }
+    .summary-hd h3 { font-size: var(--ts-base); font-weight: 800; color: #fff; }
+    .summary-body { padding: 18px; }
+    .summary-line {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: var(--ts-sm); margin-bottom: 12px; color: var(--text-secondary);
+      padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    }
+    .summary-line:last-of-type { border-bottom: none; margin-bottom: 0; }
+    .summary-line strong { color: var(--text-primary); font-weight: 700; }
+    .summary-total {
+      display: flex; justify-content: space-between; align-items: center;
+      border-top: 2px solid var(--border); padding-top: 14px; margin: 14px 0 6px;
+    }
+    .st-label { font-size: var(--ts-sm); font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: .4px; }
+    .st-price { font-size: var(--ts-2xl); font-weight: 900; color: var(--azul); }
 
-    .security-note { font-size: .68rem; color: #bbb; text-align: center; margin: 10px 0; display: flex; align-items: center; justify-content: center; gap: 4px; }
-
+    .security-note {
+      font-size: var(--ts-xs); color: var(--text-muted); text-align: center;
+      margin: 12px 0; display: flex; align-items: center; justify-content: center; gap: 5px;
+    }
     .btn-confirm {
-      display: flex; align-items: center; justify-content: center;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
       width: 100%; background: var(--verde); color: #fff;
-      padding: 16px; border-radius: 35px; font-weight: 800; font-size: .9rem;
-      border: none; cursor: pointer; transition: .2s; min-height: 52px; text-decoration: none;
+      padding: 16px; border-radius: var(--r-pill); font-weight: 800;
+      font-size: var(--ts-base); border: none; cursor: pointer;
+      transition: all var(--t); min-height: 54px; font-family: var(--font);
+      box-shadow: 0 4px 14px rgba(151,215,0,.3);
     }
-    .btn-confirm:active { background: var(--verde-dark); }
-    .btn-confirm:disabled { opacity: .5; cursor: not-allowed; }
-    .btn-back { display: block; text-align: center; margin-top: 10px; color: var(--gris); text-decoration: none; font-size: .78rem; font-weight: 600; }
+    .btn-confirm:hover  { background: var(--verde-dark); box-shadow: 0 6px 18px rgba(151,215,0,.35); transform: translateY(-1px); }
+    .btn-confirm:active { transform: scale(.98); }
+    .btn-confirm:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; transform: none; }
+    .btn-back {
+      display: block; text-align: center; margin-top: 12px;
+      color: var(--text-muted); font-size: var(--ts-sm); font-weight: 600;
+      text-decoration: none; transition: color var(--t);
+    }
+    .btn-back:hover { color: var(--azul); }
 
-    footer { background: var(--azul); color: #fff; padding: 28px 16px; text-align: center; }
-    footer p { font-size: .72rem; opacity: .75; }
-
+    /* ── RESPONSIVE ── */
     @media (min-width: 768px) {
-      .page { flex-direction: row; align-items: flex-start; padding: 28px 20px; margin: 0 auto; }
-      .order-card { flex: 1; }
-      .summary-card { width: 280px; flex-shrink: 0; position: sticky; top: 20px; }
-      footer { padding: 30px 5%; }
+      .page { flex-direction: row; align-items: flex-start; padding: 28px 20px; }
+      .order-col { flex: 1; display: flex; flex-direction: column; gap: 16px; }
+      .summary-card { width: 290px; flex-shrink: 0; position: sticky; top: 20px; }
     }
   </style>
 </head>
@@ -110,21 +125,31 @@
 
 <main class="page">
 
-  <div style="display:flex; flex-direction:column; gap:16px; flex:1;">
+  <div class="order-col" style="flex:1; display:flex; flex-direction:column; gap:16px;">
+
     <!-- Steps -->
     <div class="steps">
-      <span class="step active">① Carrito</span>
-      <span class="step-sep">›</span>
-      <span class="step">② Pago</span>
-      <span class="step-sep">›</span>
-      <span class="step">③ Confirmación</span>
+      <div class="step-item active">
+        <span class="step-num">1</span>
+        <span>Carrito</span>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item">
+        <span class="step-num">2</span>
+        <span>Pago</span>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item">
+        <span class="step-num">3</span>
+        <span>Confirmación</span>
+      </div>
     </div>
 
     <!-- Order card -->
     <div class="order-card">
       <div class="order-card-hd">
         <h2>Resumen de tu compra</h2>
-        <p>Revisa los ítems, beneficiarios y precios aplicados antes de continuar.</p>
+        <p>Revisa los ítems, beneficiarios y precios antes de continuar.</p>
       </div>
       <div class="order-body">
         {% if carrito %}
@@ -145,7 +170,6 @@
             <span class="total-label">Total a pagar</span>
             <span class="total-price">${{ "{:,.0f}".format(total) }}</span>
           </div>
-
           <button class="payload-toggle" onclick="togglePayload()">
             <span>🔌 Ver payload OMS (simulación)</span><span id="tog">▼</span>
           </button>
@@ -155,12 +179,14 @@
         {% else %}
           <div class="empty-state">
             <span class="empty-icon">🛒</span>
-            <p>Tu carrito está vacío.</p>
-            <a href="/vacunas">← Volver a la tienda</a>
+            <div class="empty-title">Tu carrito está vacío</div>
+            <p class="empty-desc">Agrega productos para continuar con la compra.</p>
+            <a href="/vacunas" class="btn btn-primary">← Volver a la tienda</a>
           </div>
         {% endif %}
       </div>
     </div>
+
   </div>
 
   <!-- Summary sidebar -->
@@ -169,12 +195,12 @@
     <div class="summary-body">
       <div class="summary-line"><span>Ítems</span><strong>{{ carrito|length }}</strong></div>
       <div class="summary-line"><span>Subtotal</span><strong>${{ "{:,.0f}".format(total) }}</strong></div>
-      <div class="summary-line"><span>IVA incluido</span><strong>✓</strong></div>
+      <div class="summary-line"><span>IVA</span><strong>Incluido</strong></div>
       <div class="summary-total">
         <span class="st-label">Total</span>
         <span class="st-price">${{ "{:,.0f}".format(total) }}</span>
       </div>
-      <div class="security-note">🔒 Pago seguro SSL</div>
+      <div class="security-note">🔒 Pago 100% seguro · SSL</div>
       {% if carrito %}
       <form action="/confirmar-b2c" method="POST">
         <button type="submit" class="btn-confirm">Proceder al pago →</button>
@@ -188,7 +214,7 @@
 
 </main>
 
-<footer><p>&copy; 2026 Comfandi. Vigilado Supersalud.</p></footer>
+<footer class="site-footer-simple">&copy; 2026 Comfandi · Vigilado Supersalud</footer>
 
 <script>
   function togglePayload() {

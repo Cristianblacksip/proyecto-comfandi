@@ -9,7 +9,13 @@
       "Bash(git add:*)",
       "Bash(gh pr:*)",
       "Bash(pip --version)",
-      "Bash(python app.py)"
+      "Bash(python app.py)",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Bash(gh api:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(claude mcp:*)",
+      "Bash(start cmd:*)"
     ]
   }
 }

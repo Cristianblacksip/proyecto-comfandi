@@ -4,447 +4,236 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Comfandi — Tienda en Línea</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <style>
-    :root {
-      --azul: #004691; --azul-dark: #003470; --azul-light: #e8f0fb;
-      --cian: #01bcdc; --verde: #97d700; --verde-dark: #82b900;
-      --fondo: #f4f7f9; --gris: #6b7280; --gris-light: #f0f2f5;
-    }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fff; color: #222; }
+    body { background: #fff; }
 
-    /* ══ TOP BAR ══ */
-    .top-bar {
-      background: var(--azul); color: #fff;
-      font-size: .72rem; font-weight: 600;
-      padding: 7px 5%;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .top-bar a { color: rgba(255,255,255,.8); text-decoration: none; margin-left: 16px; }
-    .top-bar a:hover { color: #fff; }
-
-    /* ══ MAIN NAV ══ */
-    .main-nav {
-      position: sticky; top: 0; z-index: 1000;
-      background: #fff;
-      box-shadow: 0 2px 12px rgba(0,0,0,.09);
-      padding: 0 5%;
-    }
-    .nav-inner {
-      display: flex; align-items: center; gap: 16px;
-      height: 64px;
-    }
-    .nav-logo img { height: 42px; display: block; }
-    .nav-search {
-      flex: 1; max-width: 520px;
-      display: flex; border: 1.5px solid #dde3ed; border-radius: 30px; overflow: hidden;
-    }
-    .nav-search input {
-      flex: 1; padding: 10px 16px; border: none; outline: none;
-      font-size: .88rem; background: #f9fafb;
-    }
-    .nav-search button {
-      padding: 10px 18px; background: var(--azul); border: none;
-      color: #fff; font-size: .88rem; cursor: pointer;
-    }
-    .nav-actions {
-      display: flex; align-items: center; gap: 12px; margin-left: auto;
-    }
-    .btn-b2b {
-      display: flex; align-items: center; gap: 6px;
-      background: var(--azul); color: #fff;
-      padding: 9px 16px; border-radius: 25px;
-      font-size: .78rem; font-weight: 800;
-      text-decoration: none; border: none; cursor: pointer;
-      transition: .2s; white-space: nowrap;
-    }
-    .btn-b2b:hover { background: var(--azul-dark); }
-    .nav-cart {
-      position: relative; text-decoration: none; color: var(--azul);
-      font-size: 1.5rem; display: flex; align-items: center;
-    }
-
-    /* ══ CATEGORY NAV ══ */
-    .cat-nav {
-      background: var(--fondo); border-bottom: 1px solid #e5eaf2;
-      padding: 0 5%; overflow-x: auto;
-    }
-    .cat-nav-inner {
-      display: flex; gap: 0; height: 44px; align-items: center;
-    }
-    .cat-link {
-      text-decoration: none; color: #444; font-size: .8rem; font-weight: 600;
-      padding: 0 18px; height: 100%;
-      display: flex; align-items: center; gap: 6px;
-      border-bottom: 3px solid transparent;
-      white-space: nowrap; transition: .2s;
-    }
-    .cat-link:hover { color: var(--azul); border-color: var(--azul); }
-    .cat-link.active { color: var(--azul); border-color: var(--verde); font-weight: 800; }
-
-    /* ══ HERO BANNER ══ */
+    /* ── HERO ── */
     .hero {
-      background: linear-gradient(135deg, var(--azul) 0%, #0060c0 60%, var(--cian) 100%);
-      padding: 48px 5% 56px;
-      display: flex; flex-direction: column; align-items: flex-start; gap: 16px;
+      background: url("{{ url_for('static', filename='Banner_home.webp') }}") center center / cover no-repeat;
+      padding: 48px 5% 52px;
       position: relative; overflow: hidden;
+      min-height: 340px;
     }
-    .hero::after {
+    .hero::before {
       content: '';
-      position: absolute; right: -40px; top: -40px;
-      width: 340px; height: 340px;
-      background: radial-gradient(circle, rgba(1,188,220,.3) 0%, transparent 70%);
-      border-radius: 50%; pointer-events: none;
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, rgba(0,30,80,.62) 0%, rgba(0,30,80,.25) 60%, transparent 100%);
+      pointer-events: none;
     }
+    .hero-inner { position: relative; z-index: 1; max-width: 600px; }
     .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
       background: var(--verde); color: #fff;
-      font-size: .68rem; font-weight: 800; padding: 4px 14px;
-      border-radius: 20px; text-transform: uppercase; letter-spacing: .5px;
+      font-size: var(--ts-xs); font-weight: 800; padding: 5px 14px;
+      border-radius: var(--r-pill); text-transform: uppercase; letter-spacing: .5px;
+      margin-bottom: 16px;
     }
     .hero h1 {
-      font-size: clamp(1.6rem, 5vw, 2.4rem);
-      font-weight: 900; color: #fff; line-height: 1.2; max-width: 520px;
+      font-size: clamp(1.75rem, 5.5vw, 2.75rem);
+      font-weight: 900; color: #fff; line-height: 1.15; margin-bottom: 14px;
     }
-    .hero p { font-size: .95rem; color: rgba(255,255,255,.85); max-width: 420px; line-height: 1.6; }
+    .hero h1 span { color: var(--cian); }
+    .hero p { font-size: var(--ts-base); color: rgba(255,255,255,.85); line-height: 1.65; margin-bottom: 24px; max-width: 480px; }
     .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
     .btn-hero-primary {
       background: var(--verde); color: #fff;
-      padding: 14px 28px; border-radius: 35px;
-      font-weight: 800; font-size: .9rem; text-decoration: none;
-      transition: .2s; display: inline-block;
+      padding: 14px 28px; border-radius: var(--r-pill);
+      font-weight: 800; font-size: var(--ts-base); text-decoration: none;
+      transition: all var(--t); display: inline-flex; align-items: center; gap: 6px;
+      box-shadow: 0 4px 16px rgba(151,215,0,.35);
     }
-    .btn-hero-primary:hover { background: var(--verde-dark); transform: translateY(-1px); }
+    .btn-hero-primary:hover { background: var(--verde-dark); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(151,215,0,.4); }
     .btn-hero-secondary {
-      background: rgba(255,255,255,.15); color: #fff;
-      padding: 14px 28px; border-radius: 35px;
-      font-weight: 700; font-size: .9rem; text-decoration: none;
-      border: 2px solid rgba(255,255,255,.4); transition: .2s;
+      background: rgba(255,255,255,.12); color: #fff;
+      padding: 14px 28px; border-radius: var(--r-pill);
+      font-weight: 700; font-size: var(--ts-base); text-decoration: none;
+      border: 2px solid rgba(255,255,255,.35); transition: all var(--t);
+      display: inline-flex; align-items: center; gap: 6px;
     }
-    .btn-hero-secondary:hover { background: rgba(255,255,255,.25); }
+    .btn-hero-secondary:hover { background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.6); }
 
-    /* ══ PROMO STRIP ══ */
+    /* ── PROMO STRIP ── */
     .promo-strip {
-      background: var(--verde); padding: 12px 5%;
-      display: flex; justify-content: center; gap: 32px; flex-wrap: wrap;
+      background: var(--azul-dark);
+      padding: 0 5%;
+      display: flex; overflow-x: auto; scrollbar-width: none;
     }
+    .promo-strip::-webkit-scrollbar { display: none; }
     .promo-item {
-      display: flex; align-items: center; gap: 7px;
-      color: #fff; font-size: .78rem; font-weight: 700;
+      display: flex; align-items: center; gap: 8px;
+      color: rgba(255,255,255,.9); font-size: var(--ts-sm); font-weight: 600;
+      padding: 13px 20px; white-space: nowrap; border-right: 1px solid rgba(255,255,255,.1);
+      flex-shrink: 0;
     }
-    .promo-item span { font-size: 1.1rem; }
+    .promo-item:last-child { border-right: none; }
+    .promo-item .pi { font-size: 1.1rem; }
 
-    /* ══ SECTION WRAPPER ══ */
-    .section { padding: 36px 5%; }
+    /* ── SECCIONES ── */
+    .section { padding: 40px 5%; }
+    .section-alt { background: var(--bg-subtle); }
     .section-header {
       display: flex; align-items: baseline; justify-content: space-between;
-      margin-bottom: 22px;
+      margin-bottom: 24px;
     }
-    .section-title { font-size: 1.2rem; font-weight: 900; color: var(--azul); }
-    .section-link { font-size: .8rem; color: var(--cian); font-weight: 700; text-decoration: none; }
+    .section-title { font-size: var(--ts-xl); font-weight: 900; color: var(--azul); }
+    .section-title span { color: var(--cian); }
+    .section-link { font-size: var(--ts-sm); color: var(--cian); font-weight: 700; text-decoration: none; }
     .section-link:hover { text-decoration: underline; }
 
-    /* ══ CATEGORY CARDS ══ */
+    /* ── CATEGORY CARDS ── */
     .cat-cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
     }
-    @media (min-width: 768px) {
-      .cat-cards { grid-template-columns: repeat(6, 1fr); }
-    }
+    @media (min-width: 640px) { .cat-cards { grid-template-columns: repeat(6, 1fr); } }
     .cat-card {
-      background: var(--fondo); border-radius: 16px;
-      padding: 20px 8px; text-align: center;
+      background: var(--bg-subtle); border-radius: var(--r-xl);
+      padding: 20px 10px; text-align: center;
       text-decoration: none; color: var(--azul);
-      transition: .2s; border: 2px solid transparent;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: all var(--t); border: 2px solid transparent;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
     }
-    .cat-card:hover { border-color: var(--cian); background: #fff; box-shadow: 0 4px 14px rgba(0,70,145,.1); transform: translateY(-2px); }
-    .cat-card-icon { font-size: 2rem; display: block; margin-bottom: 8px; }
-    .cat-card-name { font-size: .78rem; font-weight: 800; }
+    .cat-card:hover {
+      border-color: var(--cian); background: #fff;
+      box-shadow: 0 4px 16px rgba(0,70,145,.1); transform: translateY(-3px);
+    }
+    .cat-icon { font-size: 2rem; line-height: 1; }
+    .cat-name { font-size: var(--ts-sm); font-weight: 800; }
 
-    /* ══ PRODUCT GRID ══ */
+    /* ── PRODUCT GRID ── */
     .product-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 20px;
-    }
-    /* En desktop mostrar las tarjetas duplicadas, en mobile ocultarlas */
-    .prod-card-desktop-only { display: none; }
-    @media (min-width: 900px) {
-      .prod-card-desktop-only { display: flex; }
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;
     }
     .prod-card {
-      background: #fff; border-radius: 16px;
-      border: 1.5px solid #e8edf5;
-      overflow: hidden; transition: .2s;
+      background: #fff; border-radius: var(--r-xl);
+      border: 1.5px solid var(--border);
+      overflow: hidden; transition: all var(--t);
       display: flex; flex-direction: column;
     }
-    .prod-card:hover { box-shadow: 0 8px 28px rgba(0,70,145,.12); transform: translateY(-3px); border-color: var(--cian); }
+    .prod-card:hover {
+      box-shadow: var(--sh-lg); transform: translateY(-4px);
+      border-color: var(--cian);
+    }
     .prod-img-wrap {
-      background: var(--fondo); height: 180px;
+      background: var(--bg-subtle); height: 190px;
       display: flex; align-items: center; justify-content: center;
       position: relative; overflow: hidden;
     }
-    .prod-img-wrap img { max-height: 140px; max-width: 90%; mix-blend-mode: multiply; }
+    .prod-img-wrap img { max-height: 145px; max-width: 88%; mix-blend-mode: multiply; transition: transform .3s ease; }
+    .prod-card:hover .prod-img-wrap img { transform: scale(1.04); }
     .prod-badge {
-      position: absolute; top: 10px; left: 10px;
-      background: var(--verde); color: #fff;
-      font-size: .6rem; font-weight: 800; padding: 3px 9px;
-      border-radius: 10px; text-transform: uppercase;
+      position: absolute; top: 12px; left: 12px;
+      font-size: var(--ts-xs); font-weight: 800; padding: 4px 10px;
+      border-radius: var(--r-pill); text-transform: uppercase; letter-spacing: .3px;
     }
-    .prod-body { padding: 14px; flex: 1; display: flex; flex-direction: column; }
-    .prod-sku { font-size: .6rem; color: #bbb; font-weight: 600; margin-bottom: 4px; }
-    .prod-name { font-size: .95rem; font-weight: 800; color: var(--azul); margin-bottom: 6px; line-height: 1.3; }
-    .prod-desc { font-size: .76rem; color: var(--gris); line-height: 1.55; flex: 1; margin-bottom: 12px; }
-    .prod-price-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 12px; }
-    .prod-price-from { font-size: .65rem; color: var(--gris); }
-    .prod-price { font-size: 1.15rem; font-weight: 900; color: var(--azul); }
+    .prod-body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
+    .prod-sku { font-size: var(--ts-xs); color: var(--text-muted); font-weight: 600; margin-bottom: 5px; }
+    .prod-name { font-size: var(--ts-md); font-weight: 800; color: var(--azul); margin-bottom: 7px; line-height: 1.3; }
+    .prod-desc { font-size: var(--ts-sm); color: var(--text-secondary); line-height: 1.6; flex: 1; margin-bottom: 14px; }
+    .prod-price-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 14px; }
+    .prod-price-from { font-size: var(--ts-xs); color: var(--text-muted); font-weight: 500; }
+    .prod-price { font-size: var(--ts-2xl); font-weight: 900; color: var(--azul); line-height: 1; }
     .btn-prod {
-      display: block; background: var(--azul); color: #fff;
-      text-align: center; padding: 11px; border-radius: 10px;
-      text-decoration: none; font-weight: 800; font-size: .82rem;
-      transition: .2s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      background: var(--azul); color: #fff;
+      padding: 12px; border-radius: var(--r-lg);
+      text-decoration: none; font-weight: 700; font-size: var(--ts-sm);
+      transition: background var(--t);
     }
     .btn-prod:hover { background: var(--azul-dark); }
 
-    /* ══ BANNER DOBLE ══ */
-    .banner-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
+    /* ── BANNER DOBLE ── */
+    .banner-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 580px) { .banner-grid { grid-template-columns: 1fr; } }
     .banner-card {
-      border-radius: 18px; padding: 28px 24px;
+      border-radius: var(--r-xl); padding: 28px 24px;
       display: flex; flex-direction: column; gap: 10px;
-      min-height: 160px; position: relative; overflow: hidden;
+      min-height: 170px; position: relative; overflow: hidden;
+      text-decoration: none;
     }
-    .banner-card.primary { background: linear-gradient(135deg, var(--azul), #0060c0); color: #fff; }
-    .banner-card.secondary { background: linear-gradient(135deg, var(--verde-dark), var(--verde)); color: #fff; }
-    .banner-tag {
-      font-size: .62rem; font-weight: 800; text-transform: uppercase;
-      letter-spacing: .6px; opacity: .8;
+    .banner-card.primary   { background: linear-gradient(135deg, var(--azul), #0060c0); }
+    .banner-card.secondary { background: linear-gradient(135deg, var(--verde-dark), var(--verde)); }
+    .banner-tag { font-size: var(--ts-xs); font-weight: 800; text-transform: uppercase; letter-spacing: .6px; color: rgba(255,255,255,.75); }
+    .banner-title { font-size: var(--ts-xl); font-weight: 900; color: #fff; line-height: 1.25; }
+    .banner-sub   { font-size: var(--ts-sm); color: rgba(255,255,255,.8); line-height: 1.55; }
+    .banner-cta {
+      margin-top: auto; align-self: flex-start;
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(255,255,255,.2); border: 1.5px solid rgba(255,255,255,.4);
+      color: #fff; padding: 8px 18px; border-radius: var(--r-pill);
+      font-size: var(--ts-sm); font-weight: 800; transition: background var(--t);
     }
-    .banner-title { font-size: 1.05rem; font-weight: 900; line-height: 1.3; }
-    .banner-sub { font-size: .75rem; opacity: .85; }
-    .banner-btn {
-      margin-top: auto;
-      display: inline-block; background: rgba(255,255,255,.2);
-      border: 1.5px solid rgba(255,255,255,.5); color: #fff;
-      padding: 8px 18px; border-radius: 20px;
-      font-size: .75rem; font-weight: 800; text-decoration: none;
-      width: fit-content; transition: .2s;
-    }
-    .banner-btn:hover { background: rgba(255,255,255,.35); }
+    .banner-card:hover .banner-cta { background: rgba(255,255,255,.32); }
     .banner-deco {
-      position: absolute; right: -20px; bottom: -20px;
-      font-size: 6rem; opacity: .12; pointer-events: none;
+      position: absolute; right: -16px; bottom: -16px;
+      font-size: 7rem; opacity: .1; pointer-events: none; line-height: 1;
     }
 
-    /* ══ CONFIANZA ══ */
-    .trust-strip {
-      background: var(--fondo); padding: 28px 5%;
-      display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;
+    /* ── FOOTER ── */
+    footer.home-footer {
+      background: var(--azul); color: #fff; padding: 44px 5% 24px;
     }
-    .trust-item {
-      display: flex; align-items: center; gap: 10px;
-      font-size: .82rem; color: #444; font-weight: 600;
-    }
-    .trust-icon { font-size: 1.6rem; }
-    .trust-item strong { display: block; font-size: .9rem; color: var(--azul); }
-
-    /* ══ FOOTER ══ */
-    footer {
-      background: var(--azul); color: #fff;
-      padding: 40px 5% 24px;
-    }
-    .footer-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 28px; margin-bottom: 32px;
-    }
-    .footer-col h4 { font-size: .85rem; font-weight: 800; margin-bottom: 12px; opacity: .9; }
-    .footer-col a {
-      display: block; color: rgba(255,255,255,.65);
-      font-size: .78rem; text-decoration: none; margin-bottom: 7px;
-    }
-    .footer-col a:hover { color: #fff; }
-    .footer-bottom {
-      border-top: 1px solid rgba(255,255,255,.15);
-      padding-top: 18px;
-      display: flex; justify-content: space-between; align-items: center;
-      flex-wrap: wrap; gap: 8px;
-      font-size: .7rem; opacity: .6;
-    }
-
-    /* ══ MODAL B2B LOGIN ══ */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,.55); z-index: 9999;
-      align-items: center; justify-content: center; padding: 20px;
-    }
-    .modal-overlay.open { display: flex; }
-    .modal-box {
-      background: #fff; border-radius: 22px;
-      width: 100%; max-width: 400px;
-      box-shadow: 0 24px 64px rgba(0,0,0,.25);
-      overflow: hidden; animation: slideUp .25s ease;
-    }
-    @keyframes slideUp {
-      from { transform: translateY(30px); opacity: 0; }
-      to   { transform: translateY(0);    opacity: 1; }
-    }
-    .modal-header {
-      background: var(--azul); padding: 24px 24px 20px;
-      text-align: center;
-    }
-    .modal-logo {
-      background: rgba(255,255,255,.15); display: inline-block;
-      padding: 10px 16px; border-radius: 12px; margin-bottom: 12px;
-    }
-    .modal-logo img { height: 36px; display: block; }
-    .modal-header h2 { color: #fff; font-size: .95rem; font-weight: 800; margin-bottom: 4px; }
-    .modal-header p  { color: rgba(255,255,255,.75); font-size: .75rem; }
-    .modal-body { padding: 24px; }
-    .m-label { font-size: .75rem; font-weight: 700; color: #444; display: block; margin-bottom: 6px; }
-    .m-input {
-      width: 100%; padding: 13px 14px; border: 1.5px solid #dde3ed; border-radius: 10px;
-      font-size: 1rem; margin-bottom: 14px; transition: .2s;
-    }
-    .m-input:focus { outline: none; border-color: var(--cian); box-shadow: 0 0 0 3px rgba(1,188,220,.12); }
-    .m-error {
-      background: #fff5f5; border: 1.5px solid #feb2b2; border-radius: 8px;
-      padding: 9px 12px; margin-bottom: 14px;
-      font-size: .76rem; font-weight: 600; color: #c53030;
-    }
-    .btn-modal-login {
-      width: 100%; padding: 14px; background: var(--azul); color: #fff;
-      border: none; border-radius: 35px; font-weight: 800; font-size: .9rem;
-      cursor: pointer; transition: .2s;
-    }
-    .btn-modal-login:hover { background: var(--azul-dark); }
-    .modal-close-btn {
-      display: block; text-align: center; margin-top: 12px;
-      color: var(--gris); font-size: .75rem; cursor: pointer;
-      background: none; border: none; width: 100%; padding: 6px;
-    }
-    .modal-close-btn:hover { color: var(--azul); }
-
-    /* ══ RESPONSIVE ══ */
-    @media (max-width: 600px) {
-      .top-bar .top-right { display: none; }
-      .cat-nav { display: none; }
-      .banner-grid { grid-template-columns: 1fr; }
-      .trust-strip { gap: 20px; }
-    }
-    @media (min-width: 900px) {
-      .hero { flex-direction: row; align-items: center; padding: 64px 5%; }
-      .hero-content { flex: 1; }
-      .hero-visual { flex: 0 0 auto; font-size: 8rem; opacity: .25; }
-    }
+    footer.home-footer .footer-logo img { height: 40px; opacity: .85; margin-bottom: 12px; }
+    footer.home-footer .footer-tagline { font-size: var(--ts-sm); color: rgba(255,255,255,.55); line-height: 1.75; }
   </style>
 </head>
 <body>
 
-<!-- ══ TOP BAR ══ -->
-<div class="top-bar">
-  <span>Caja de Compensación Familiar del Valle del Cauca</span>
-  <span class="top-right">
-    <a href="#">Mis pedidos</a>
-    <a href="#">Ayuda</a>
-    <a href="#">PQR</a>
-  </span>
-</div>
+{% include '_header.html' %}
 
-<!-- ══ MAIN NAV ══ -->
-<nav class="main-nav">
-  <div class="nav-inner">
-    <a href="/" class="nav-logo">
-      <img src="{{ url_for('static', filename='logo.png') }}" alt="Comfandi">
-    </a>
-    <div class="nav-search">
-      <input type="text" placeholder="Buscar vacunas, kits, servicios…">
-      <button>🔍</button>
-    </div>
-    <div class="nav-actions">
-      <button class="btn-b2b" onclick="openB2BModal()">
-        🏢 Portal Empresarial
-      </button>
-    </div>
-  </div>
-</nav>
-
-<!-- ══ CATEGORY NAV ══ -->
-<div class="cat-nav">
-  <div class="cat-nav-inner">
-    <a href="/" class="cat-link active">🏠 Inicio</a>
-    <a href="/vacunas" class="cat-link">💉 Vacunas</a>
-    <a href="/kit-salud" class="cat-link">🩹 Kits de Salud</a>
-    <a href="#" class="cat-link">💊 Medicamentos</a>
-    <a href="#" class="cat-link">🧪 Laboratorio</a>
-    <a href="#" class="cat-link">🏋️ Bienestar</a>
-    <a href="#" class="cat-link">🏥 IPS Comfandi</a>
-  </div>
-</div>
-
-<!-- ══ HERO BANNER ══ -->
+<!-- ── HERO ── -->
 <section class="hero">
-  <div class="hero-content">
-    <span class="hero-badge">✨ Nuevos productos 2026</span>
-    <h1>Tu salud,<br>nuestro compromiso</h1>
-    <p>Accede a vacunas, kits de primeros auxilios y servicios de salud con precios según tu categoría de afiliación Comfandi.</p>
+  <div class="hero-inner">
+    <div class="hero-badge">✨ Nuevos productos 2026</div>
+    <h1>Tu salud,<br><span>nuestro compromiso</span></h1>
+    <p>Accede a vacunas, kits de salud y servicios con precios según tu categoría de afiliación Comfandi.</p>
     <div class="hero-btns">
-      <a href="/vacunas" class="btn-hero-primary">Ver productos</a>
+      <a href="/vacunas" class="btn-hero-primary">Ver productos →</a>
       <a href="#productos" class="btn-hero-secondary">Conocer más</a>
     </div>
   </div>
 </section>
 
-<!-- ══ PROMO STRIP ══ -->
+<!-- ── PROMO STRIP ── -->
 <div class="promo-strip">
-  <div class="promo-item"><span>🚚</span> Envío gratis en pedidos +$100.000</div>
-  <div class="promo-item"><span>🔒</span> Pago 100% seguro</div>
-  <div class="promo-item"><span>💳</span> Precio según tu categoría</div>
-  <div class="promo-item"><span>📞</span> Soporte 24/7</div>
+  <div class="promo-item"><span class="pi">🚚</span> Envío gratis +$100.000</div>
+  <div class="promo-item"><span class="pi">🔒</span> Pago 100% seguro</div>
+  <div class="promo-item"><span class="pi">💳</span> Precio según tu categoría</div>
+  <div class="promo-item"><span class="pi">📞</span> Soporte 24/7</div>
+  <div class="promo-item"><span class="pi">🏥</span> IPS certificada Supersalud</div>
 </div>
 
-<!-- ══ CATEGORÍAS ══ -->
+<!-- ── CATEGORÍAS ── -->
 <section class="section">
   <div class="section-header">
     <h2 class="section-title">Categorías</h2>
   </div>
   <div class="cat-cards">
     <a href="/vacunas" class="cat-card">
-      <span class="cat-card-icon">💉</span>
-      <span class="cat-card-name">Vacunas</span>
+      <span class="cat-icon">💉</span><span class="cat-name">Vacunas</span>
     </a>
     <a href="/kit-salud" class="cat-card">
-      <span class="cat-card-icon">🩹</span>
-      <span class="cat-card-name">Kits de Salud</span>
+      <span class="cat-icon">🩹</span><span class="cat-name">Kits de Salud</span>
     </a>
     <a href="#" class="cat-card">
-      <span class="cat-card-icon">💊</span>
-      <span class="cat-card-name">Medicamentos</span>
+      <span class="cat-icon">💊</span><span class="cat-name">Medicamentos</span>
     </a>
     <a href="#" class="cat-card">
-      <span class="cat-card-icon">🧪</span>
-      <span class="cat-card-name">Laboratorio</span>
+      <span class="cat-icon">🧪</span><span class="cat-name">Laboratorio</span>
     </a>
     <a href="#" class="cat-card">
-      <span class="cat-card-icon">🏋️</span>
-      <span class="cat-card-name">Bienestar</span>
+      <span class="cat-icon">🏋️</span><span class="cat-name">Bienestar</span>
     </a>
     <a href="#" class="cat-card">
-      <span class="cat-card-icon">🏥</span>
-      <span class="cat-card-name">IPS Comfandi</span>
+      <span class="cat-icon">🏥</span><span class="cat-name">IPS Comfandi</span>
     </a>
   </div>
 </section>
 
-<!-- ══ PRODUCTOS DESTACADOS ══ -->
-<section class="section" id="productos" style="background: var(--fondo);">
+<!-- ── PRODUCTOS DESTACADOS ── -->
+<section class="section section-alt" id="productos">
   <div class="section-header">
-    <h2 class="section-title">Productos destacados</h2>
+    <h2 class="section-title">Productos <span>destacados</span></h2>
     <a href="/vacunas" class="section-link">Ver todos →</a>
   </div>
   <div class="product-grid">
@@ -453,7 +242,7 @@
     <div class="prod-card">
       <div class="prod-img-wrap">
         <img src="{{ url_for('static', filename='vacuna.png') }}" alt="Vacuna Influenza">
-        <span class="prod-badge">{{ productos.vacuna.badge }}</span>
+        <span class="prod-badge" style="background:var(--verde);color:#fff;">{{ productos.vacuna.badge }}</span>
       </div>
       <div class="prod-body">
         <div class="prod-sku">SKU: {{ productos.vacuna.sku }}</div>
@@ -463,7 +252,7 @@
           <span class="prod-price-from">Desde</span>
           <span class="prod-price">${{ "{:,.0f}".format(productos.vacuna.precios.A) }}</span>
         </div>
-        <a href="/vacunas" class="btn-prod">Comprar →</a>
+        <a href="/vacunas" class="btn-prod">Comprar ahora →</a>
       </div>
     </div>
 
@@ -471,7 +260,7 @@
     <div class="prod-card">
       <div class="prod-img-wrap">
         <img src="{{ url_for('static', filename='kit.jpg') }}" alt="Kit Primeros Auxilios">
-        <span class="prod-badge" style="background:var(--cian);">{{ productos.kit.badge }}</span>
+        <span class="prod-badge" style="background:var(--cian);color:#fff;">{{ productos.kit.badge }}</span>
       </div>
       <div class="prod-body">
         <div class="prod-sku">SKU: {{ productos.kit.sku }}</div>
@@ -481,69 +270,34 @@
           <span class="prod-price-from">Desde</span>
           <span class="prod-price">${{ "{:,.0f}".format(productos.kit.precios.A) }}</span>
         </div>
-        <a href="/kit-salud" class="btn-prod">Comprar →</a>
-      </div>
-    </div>
-
-    <!-- Duplicados solo desktop -->
-    <div class="prod-card prod-card-desktop-only">
-      <div class="prod-img-wrap">
-        <img src="{{ url_for('static', filename='vacuna.png') }}" alt="Vacuna Influenza">
-        <span class="prod-badge">{{ productos.vacuna.badge }}</span>
-      </div>
-      <div class="prod-body">
-        <div class="prod-sku">SKU: {{ productos.vacuna.sku }}</div>
-        <div class="prod-name">{{ productos.vacuna.nombre }}</div>
-        <p class="prod-desc">{{ productos.vacuna.descripcion }}</p>
-        <div class="prod-price-row">
-          <span class="prod-price-from">Desde</span>
-          <span class="prod-price">${{ "{:,.0f}".format(productos.vacuna.precios.A) }}</span>
-        </div>
-        <a href="/vacunas" class="btn-prod">Comprar →</a>
-      </div>
-    </div>
-
-    <div class="prod-card prod-card-desktop-only">
-      <div class="prod-img-wrap">
-        <img src="{{ url_for('static', filename='kit.jpg') }}" alt="Kit Primeros Auxilios">
-        <span class="prod-badge" style="background:var(--cian);">{{ productos.kit.badge }}</span>
-      </div>
-      <div class="prod-body">
-        <div class="prod-sku">SKU: {{ productos.kit.sku }}</div>
-        <div class="prod-name">{{ productos.kit.nombre }}</div>
-        <p class="prod-desc">{{ productos.kit.descripcion }}</p>
-        <div class="prod-price-row">
-          <span class="prod-price-from">Desde</span>
-          <span class="prod-price">${{ "{:,.0f}".format(productos.kit.precios.A) }}</span>
-        </div>
-        <a href="/kit-salud" class="btn-prod">Comprar →</a>
+        <a href="/kit-salud" class="btn-prod">Comprar ahora →</a>
       </div>
     </div>
 
   </div>
 </section>
 
-<!-- ══ BANNERS DOBLES ══ -->
+<!-- ── BANNERS DOBLES ── -->
 <section class="section">
   <div class="banner-grid">
-    <div class="banner-card primary">
+    <a href="/vacunas" class="banner-card primary">
       <span class="banner-tag">Campaña 2026</span>
       <div class="banner-title">Vacúnate contra la Influenza</div>
-      <div class="banner-sub">Protección para toda la familia. Precios exclusivos para afiliados.</div>
-      <a href="/vacunas" class="banner-btn">Ver campaña →</a>
+      <div class="banner-sub">Protección para toda la familia con precios exclusivos para afiliados.</div>
+      <span class="banner-cta">Ver campaña →</span>
       <span class="banner-deco">💉</span>
-    </div>
-    <div class="banner-card secondary">
+    </a>
+    <a href="/kit-salud" class="banner-card secondary">
       <span class="banner-tag">Esencial</span>
       <div class="banner-title">Kit de Primeros Auxilios Premium</div>
       <div class="banner-sub">Preparado para cualquier emergencia. Certificado por IPS Comfandi.</div>
-      <a href="/kit-salud" class="banner-btn">Ver producto →</a>
+      <span class="banner-cta">Ver producto →</span>
       <span class="banner-deco">🩹</span>
-    </div>
+    </a>
   </div>
 </section>
 
-<!-- ══ CONFIANZA ══ -->
+<!-- ── TRUST STRIP ── -->
 <div class="trust-strip">
   <div class="trust-item">
     <span class="trust-icon">🏆</span>
@@ -563,14 +317,14 @@
   </div>
 </div>
 
-<!-- ══ FOOTER ══ -->
-<footer>
+<!-- ── FOOTER ── -->
+<footer class="home-footer">
   <div class="footer-grid">
     <div class="footer-col">
-      <img src="{{ url_for('static', filename='logo.png') }}" alt="Comfandi" style="height:36px; margin-bottom:12px; opacity:.85;">
-      <p style="font-size:.76rem; color:rgba(255,255,255,.6); line-height:1.7;">
-        Caja de Compensación Familiar del Valle del Cauca.<br>NIT 890.399.010-1
-      </p>
+      <div class="footer-logo">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Comfandi">
+      </div>
+      <p class="footer-tagline">Caja de Compensación Familiar<br>del Valle del Cauca.<br>NIT 890.399.010-1</p>
     </div>
     <div class="footer-col">
       <h4>Productos</h4>
@@ -600,67 +354,5 @@
   </div>
 </footer>
 
-<!-- ══ MODAL B2B LOGIN ══ -->
-<div class="modal-overlay" id="b2bModal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div class="modal-logo">
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="Comfandi">
-      </div>
-      <h2>Portal Empresarial B2B</h2>
-      <p>Acceso exclusivo para empresas afiliadas</p>
-    </div>
-    <div class="modal-body">
-      <div id="modal-error" class="m-error" style="display:none;"></div>
-      <label class="m-label">Contraseña de acceso empresarial</label>
-      <input class="m-input" type="password" id="modalPassword" placeholder="Ingresa la contraseña" onkeydown="if(event.key==='Enter') doB2BLogin()">
-      <button class="btn-modal-login" onclick="doB2BLogin()">Ingresar al Portal B2B →</button>
-      <button class="modal-close-btn" onclick="closeB2BModal()">Cancelar</button>
-    </div>
-  </div>
-</div>
-
-<script>
-  function openB2BModal() {
-    document.getElementById('b2bModal').classList.add('open');
-    setTimeout(() => document.getElementById('modalPassword').focus(), 100);
-  }
-  function closeB2BModal() {
-    document.getElementById('b2bModal').classList.remove('open');
-    document.getElementById('modalPassword').value = '';
-    document.getElementById('modal-error').style.display = 'none';
-  }
-  document.getElementById('b2bModal').addEventListener('click', function(e) {
-    if (e.target === this) closeB2BModal();
-  });
-
-  function doB2BLogin() {
-    const pw = document.getElementById('modalPassword').value;
-    if (!pw) return;
-    fetch('/b2b/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'password=' + encodeURIComponent(pw),
-      redirect: 'follow'
-    }).then(resp => {
-      if (resp.ok && resp.url.includes('/b2b')) {
-        window.location.href = resp.url;
-      } else if (resp.redirected && !resp.url.includes('/b2b/login')) {
-        window.location.href = resp.url;
-      } else {
-        return resp.text().then(() => {
-          document.getElementById('modal-error').textContent = 'Contraseña incorrecta. Inténtalo de nuevo.';
-          document.getElementById('modal-error').style.display = 'block';
-          document.getElementById('modalPassword').value = '';
-          document.getElementById('modalPassword').focus();
-        });
-      }
-    }).catch(() => {
-      fetch('/b2b/check-auth').then(r => r.json()).then(d => {
-        if (d.authenticated) window.location.href = '/b2b';
-      });
-    });
-  }
-</script>
 </body>
 </html>

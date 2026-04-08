@@ -4,109 +4,123 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Comfandi — Acceso Portal Empresarial B2B</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <style>
-    :root {
-      --azul: #004691; --azul-dark: #003470;
-      --cian: #01bcdc; --verde: #97d700; --verde-dark: #82b900;
-      --gris: #6b7280;
-    }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
       min-height: 100vh;
-      background: linear-gradient(150deg, var(--azul) 0%, #0060c0 55%, var(--cian) 100%);
+      background: linear-gradient(150deg, var(--azul) 0%, #0060c0 55%, #0085d4 100%);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding: 20px;
+      padding: 20px; position: relative; overflow: hidden;
+    }
+    /* Decoración de fondo */
+    body::before {
+      content: '';
+      position: fixed; right: -120px; top: -120px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(1,188,220,.2) 0%, transparent 65%);
+      border-radius: 50%; pointer-events: none;
+    }
+    body::after {
+      content: '';
+      position: fixed; left: -80px; bottom: -80px;
+      width: 360px; height: 360px;
+      background: radial-gradient(circle, rgba(151,215,0,.12) 0%, transparent 65%);
+      border-radius: 50%; pointer-events: none;
     }
 
     .back-link {
-      position: fixed; top: 16px; left: 16px;
-      display: flex; align-items: center; gap: 6px;
-      color: rgba(255,255,255,.8); text-decoration: none;
-      font-size: .8rem; font-weight: 700;
-      background: rgba(255,255,255,.15); border: 1.5px solid rgba(255,255,255,.3);
-      padding: 8px 14px; border-radius: 20px; transition: .2s;
+      position: fixed; top: 18px; left: 18px; z-index: 10;
+      display: inline-flex; align-items: center; gap: 7px;
+      color: rgba(255,255,255,.85); text-decoration: none;
+      font-size: var(--ts-sm); font-weight: 700;
+      background: rgba(255,255,255,.12); border: 1.5px solid rgba(255,255,255,.25);
+      padding: 9px 16px; border-radius: var(--r-pill); transition: all var(--t);
+      backdrop-filter: blur(8px);
     }
-    .back-link:hover { background: rgba(255,255,255,.25); color: #fff; }
+    .back-link:hover { background: rgba(255,255,255,.22); color: #fff; border-color: rgba(255,255,255,.45); }
 
+    /* Card */
     .login-card {
-      background: #fff; border-radius: 24px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      background: #fff; border-radius: var(--r-2xl);
+      box-shadow: var(--sh-xl);
       width: 100%; max-width: 400px; overflow: hidden;
+      position: relative; z-index: 1;
+      animation: fadeInUp .35s ease forwards;
     }
 
     .card-header {
-      background: var(--azul); padding: 32px 28px 24px; text-align: center;
+      background: linear-gradient(135deg, var(--azul) 0%, var(--azul-mid) 100%);
+      padding: 32px 28px 26px; text-align: center;
     }
     .logo-wrap {
-      background: rgba(255,255,255,.15); display: inline-block;
-      padding: 12px 18px; border-radius: 14px; margin-bottom: 16px;
+      background: rgba(255,255,255,.15); display: inline-flex;
+      align-items: center; justify-content: center;
+      padding: 12px 20px; border-radius: var(--r-xl); margin-bottom: 18px;
+      border: 1px solid rgba(255,255,255,.2);
     }
     .logo-wrap img { height: 40px; display: block; }
 
     .portal-badge {
       display: inline-flex; align-items: center; gap: 6px;
-      background: rgba(255,255,255,.12); border: 1.5px solid rgba(255,255,255,.25);
-      color: #fff; font-size: .72rem; font-weight: 800;
-      padding: 5px 14px; border-radius: 20px; margin-bottom: 14px;
-      text-transform: uppercase; letter-spacing: .4px;
+      background: rgba(255,255,255,.12); border: 1.5px solid rgba(255,255,255,.22);
+      color: rgba(255,255,255,.9); font-size: var(--ts-xs); font-weight: 800;
+      padding: 5px 14px; border-radius: var(--r-pill); margin-bottom: 14px;
+      text-transform: uppercase; letter-spacing: .5px;
     }
-    .card-header h1 { font-size: 1.1rem; font-weight: 900; color: #fff; margin-bottom: 4px; }
-    .card-header p  { font-size: .78rem; color: rgba(255,255,255,.75); }
+    .card-header h1 { font-size: var(--ts-xl); font-weight: 900; color: #fff; margin-bottom: 6px; }
+    .card-header p  { font-size: var(--ts-sm); color: rgba(255,255,255,.72); line-height: 1.5; }
 
     .card-body { padding: 28px; }
 
-    .form-title {
-      font-size: .72rem; font-weight: 800; text-transform: uppercase;
-      letter-spacing: .8px; color: var(--gris); margin-bottom: 18px;
-      display: flex; align-items: center; gap: 6px;
+    .section-divider {
+      display: flex; align-items: center; gap: 10px;
+      font-size: var(--ts-xs); font-weight: 700; text-transform: uppercase;
+      letter-spacing: .8px; color: var(--text-muted); margin-bottom: 20px;
     }
-    .form-title::before, .form-title::after {
-      content: ''; flex: 1; height: 1px; background: #e5eaf2;
-    }
-
-    .error-box {
-      background: #fff5f5; border: 1.5px solid #feb2b2; border-radius: 10px;
-      padding: 10px 13px; margin-bottom: 16px;
-      font-size: .78rem; font-weight: 600; color: #c53030;
-      display: flex; align-items: center; gap: 6px;
+    .section-divider::before, .section-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
     }
 
-    .field-label { font-size: .75rem; font-weight: 700; color: #444; display: block; margin-bottom: 6px; }
-    .field-wrap  { position: relative; margin-bottom: 6px; }
-    .field-input {
-      width: 100%; padding: 14px 44px 14px 14px;
-      border: 1.5px solid #dde3ed; border-radius: 12px;
-      font-size: 1rem; transition: .2s; background: #f9fafb;
-    }
-    .field-input:focus {
-      outline: none; border-color: var(--cian);
-      box-shadow: 0 0 0 3px rgba(1,188,220,.14); background: #fff;
-    }
+    .field-wrap { position: relative; }
+    .field-wrap .field-input { padding-right: 46px; }
     .toggle-pw {
       position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-      background: none; border: none; cursor: pointer; font-size: 1.1rem;
-      color: var(--gris); padding: 4px;
+      background: none; border: none; cursor: pointer; font-size: 1.05rem;
+      color: var(--text-muted); padding: 6px; line-height: 1;
+      transition: color var(--t);
+    }
+    .toggle-pw:hover { color: var(--azul); }
+
+    .error-box {
+      background: var(--error-bg); border: 1.5px solid var(--error-border);
+      border-radius: var(--r-md); padding: 11px 14px; margin-bottom: 18px;
+      font-size: var(--ts-sm); font-weight: 600; color: #991b1b;
+      display: flex; align-items: center; gap: 8px;
     }
 
     .btn-login {
-      width: 100%; padding: 15px; margin-top: 18px;
-      background: var(--azul); color: #fff; border: none; border-radius: 35px;
-      font-weight: 800; font-size: .95rem; cursor: pointer;
-      transition: .2s; min-height: 52px;
+      width: 100%; padding: 15px; margin-top: 20px;
+      background: var(--azul); color: #fff; border: none; border-radius: var(--r-pill);
+      font-weight: 800; font-size: var(--ts-base); cursor: pointer;
+      transition: all var(--t); min-height: 52px; font-family: var(--font);
+      box-shadow: 0 4px 14px rgba(0,70,145,.3);
     }
-    .btn-login:hover  { background: var(--azul-dark); transform: translateY(-1px); }
+    .btn-login:hover  { background: var(--azul-dark); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,70,145,.35); }
     .btn-login:active { transform: scale(.98); }
 
     .card-footer {
-      background: #f9fafb; border-top: 1px solid #eee;
+      background: var(--bg-subtle); border-top: 1px solid var(--border);
       padding: 16px 28px; text-align: center;
     }
-    .card-footer p { font-size: .7rem; color: #aaa; line-height: 1.7; }
+    .card-footer p { font-size: var(--ts-sm); color: var(--text-muted); line-height: 1.8; }
     .card-footer a { color: var(--azul); font-weight: 700; text-decoration: none; }
     .card-footer a:hover { text-decoration: underline; }
 
-    .outside-note { margin-top: 20px; font-size: .72rem; color: rgba(255,255,255,.6); text-align: center; }
+    .outside-note {
+      margin-top: 22px; font-size: var(--ts-xs);
+      color: rgba(255,255,255,.5); text-align: center;
+      position: relative; z-index: 1;
+    }
   </style>
 </head>
 <body>
@@ -120,22 +134,26 @@
       </div>
       <div class="portal-badge">🏢 Portal Empresarial</div>
       <h1>Acceso B2B</h1>
-      <p>Ingresa la contraseña para acceder al marketplace empresarial</p>
+      <p>Ingresa la contraseña para acceder<br>al marketplace empresarial</p>
     </div>
 
     <div class="card-body">
-      <div class="form-title">Acceso seguro</div>
+      <div class="section-divider">Acceso seguro</div>
 
       {% if error %}
-      <div class="error-box">⚠️ {{ error }}</div>
+      <div class="error-box">
+        <span>⚠️</span><span>{{ error }}</span>
+      </div>
       {% endif %}
 
       <form method="POST" action="/b2b/login" autocomplete="off">
-        <label class="field-label" for="password">Contraseña empresarial</label>
-        <div class="field-wrap">
-          <input class="field-input" type="password" id="password" name="password"
-                 placeholder="Ingresa la contraseña" autofocus required>
-          <button type="button" class="toggle-pw" onclick="togglePw()" title="Mostrar/ocultar">👁</button>
+        <div class="field">
+          <label class="field-label" for="password">Contraseña empresarial</label>
+          <div class="field-wrap">
+            <input class="field-input" type="password" id="password" name="password"
+                   placeholder="Ingresa la contraseña" autofocus required>
+            <button type="button" class="toggle-pw" onclick="togglePw()" title="Mostrar/ocultar">👁</button>
+          </div>
         </div>
         <button type="submit" class="btn-login">Ingresar al Portal B2B →</button>
       </form>
@@ -149,7 +167,7 @@
     </div>
   </div>
 
-  <p class="outside-note">Acceso restringido — Solo empresas autorizadas</p>
+  <p class="outside-note">🔒 Acceso restringido — Solo empresas autorizadas</p>
 
   <script>
     function togglePw() {

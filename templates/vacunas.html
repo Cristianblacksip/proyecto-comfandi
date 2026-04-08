@@ -4,140 +4,125 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Comfandi — {{ producto.nombre }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <style>
-    :root {
-      --azul: #004691; --azul-dark: #003470;
-      --cian: #01bcdc; --verde: #97d700; --verde-dark: #82b900;
-      --fondo: #f4f7f9; --gris: #6b7280;
-    }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--fondo); color: #222; min-height: 100vh; display: flex; flex-direction: column; }
+    body { background: var(--bg-page); display: flex; flex-direction: column; min-height: 100vh; }
 
+    /* ── BREADCRUMB ── */
+    .breadcrumb {
+      padding: 12px 16px;
+      font-size: var(--ts-xs); color: var(--text-muted);
+      display: flex; align-items: center; gap: 6px;
+      border-bottom: 1px solid var(--border); background: #fff;
+    }
+    .breadcrumb a { color: var(--text-muted); text-decoration: none; transition: color var(--t); }
+    .breadcrumb a:hover { color: var(--azul); }
+    .breadcrumb-sep { opacity: .4; }
+
+    /* ── PAGE LAYOUT ── */
     .page { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
 
-    /* ── PRODUCT SECTION ── */
-    .product-card { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.07); overflow: hidden; }
+    /* ── PRODUCT CARD ── */
+    .product-card { background: #fff; border-radius: var(--r-xl); box-shadow: var(--sh-sm); overflow: hidden; }
+
     .product-img-box {
-      background: #fff; height: 220px;
+      background: var(--bg-subtle); height: 240px;
       display: flex; align-items: center; justify-content: center;
-      border-bottom: 1px solid #f0f0f0;
+      position: relative; border-bottom: 1px solid var(--border);
     }
-    .product-img-box img { max-height: 180px; mix-blend-mode: multiply; max-width: 100%; }
-    .product-info { padding: 16px; }
-    .product-title { font-size: 1.15rem; font-weight: 900; color: var(--azul); margin-bottom: 4px; }
-    .product-sku   { font-size: .65rem; color: #bbb; font-weight: 600; margin-bottom: 8px; }
-    .product-desc  { font-size: .83rem; color: var(--gris); line-height: 1.65; margin-bottom: 16px; }
+    .product-img-box img { max-height: 190px; max-width: 88%; mix-blend-mode: multiply; }
+    .product-img-badge {
+      position: absolute; top: 14px; left: 14px;
+      background: var(--verde); color: #fff;
+      font-size: var(--ts-xs); font-weight: 800; padding: 5px 12px;
+      border-radius: var(--r-pill); text-transform: uppercase; letter-spacing: .3px;
+    }
 
-    .pt-section-title { font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .7px; color: var(--gris); margin-bottom: 8px; }
-    .pt-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 16px; }
-    .pt-card { border: 2px solid #e5eaf2; border-radius: 12px; padding: 12px 8px; text-align: center; transition: .2s; }
-    .pt-card.active { border-color: var(--verde); background: #f5ffe6; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(151,215,0,.2); }
-    .pt-cat   { font-size: .62rem; font-weight: 700; text-transform: uppercase; color: var(--gris); display: block; margin-bottom: 2px; }
-    .pt-name  { font-size: .58rem; font-weight: 700; color: var(--verde-dark); display: block; margin-bottom: 5px; }
-    .pt-price { font-size: 1rem; font-weight: 900; color: var(--azul); }
-    .pt-price.highlighted { color: var(--verde-dark); }
+    .product-info { padding: 20px; }
+    .product-sku   { font-size: var(--ts-xs); color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
+    .product-title { font-size: var(--ts-xl); font-weight: 900; color: var(--azul); margin-bottom: 10px; line-height: 1.25; }
+    .product-desc  { font-size: var(--ts-base); color: var(--text-secondary); line-height: 1.7; margin-bottom: 20px; }
 
-    .cross-sell { background: var(--fondo); border-radius: 12px; padding: 14px; margin-top: 4px; display: flex; align-items: center; gap: 10px; }
-    .cross-sell-icon { font-size: 1.6rem; }
-    .cross-sell p { font-size: .78rem; color: var(--gris); line-height: 1.4; }
+    .pt-section-label {
+      font-size: var(--ts-xs); font-weight: 800; text-transform: uppercase;
+      letter-spacing: .7px; color: var(--text-muted); margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .pt-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* Cross-sell */
+    .cross-sell {
+      background: var(--azul-50); border: 1.5px solid var(--azul-light);
+      border-radius: var(--r-lg); padding: 14px 16px; margin-top: 4px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .cross-sell-icon { font-size: 1.75rem; flex-shrink: 0; }
+    .cross-sell p { font-size: var(--ts-sm); color: var(--text-secondary); line-height: 1.5; }
     .cross-sell a { color: var(--azul); font-weight: 700; text-decoration: none; }
+    .cross-sell a:hover { text-decoration: underline; }
 
     /* ── CART PANEL ── */
-    .cart-panel { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.07); overflow: hidden; border: 2px solid var(--azul); }
-    .cart-panel-header { background: var(--azul); padding: 14px 16px; color: #fff; }
-    .cart-panel-header h3 { font-size: .88rem; font-weight: 800; margin: 0; }
-    .cart-panel-header p  { font-size: .7rem; opacity: .8; margin-top: 3px; }
-    .cart-panel-body { padding: 14px 16px; }
-
-    .field-label { font-size: .74rem; font-weight: 700; color: #444; display: block; margin-bottom: 5px; }
-    .field-input {
-      width: 100%; padding: 13px 14px; border: 1.5px solid #dde3ed; border-radius: 10px;
-      font-size: 1rem; margin-bottom: 10px; transition: .2s;
+    .cart-panel {
+      background: #fff; border-radius: var(--r-xl);
+      box-shadow: var(--sh-sm); overflow: hidden;
+      border: 2px solid var(--azul-light);
     }
-    .field-input:focus { outline: none; border-color: var(--cian); box-shadow: 0 0 0 3px rgba(1,188,220,.12); }
+    .cart-panel-header {
+      background: linear-gradient(135deg, var(--azul) 0%, var(--azul-mid) 100%);
+      padding: 16px 20px;
+    }
+    .cart-panel-header h3 { font-size: var(--ts-md); font-weight: 800; color: #fff; margin-bottom: 3px; }
+    .cart-panel-header p  { font-size: var(--ts-sm); color: rgba(255,255,255,.78); }
+    .cart-panel-body { padding: 18px 20px; }
 
+    /* Result boxes */
     #result-box {
-      border-radius: 10px; padding: 11px 13px; margin-bottom: 10px;
-      font-size: .78rem; font-weight: 600; display: none; line-height: 1.5;
+      border-radius: var(--r-md); padding: 11px 14px; margin-bottom: 10px;
+      font-size: var(--ts-sm); font-weight: 600; display: none; line-height: 1.5;
     }
-    #result-box.found     { background: #f0fff4; border: 1.5px solid #86efac; color: #15803d; }
-    #result-box.not-found { background: #fffbeb; border: 1.5px solid #fcd34d; color: #92400e; }
-    #result-box.loading   { background: #f0f7ff; border: 1.5px solid #bfdbfe; color: var(--azul); }
+    #result-box.found     { background: var(--success-bg); border: 1.5px solid var(--success-border); color: #166534; }
+    #result-box.not-found { background: var(--warning-bg); border: 1.5px solid var(--warning-border); color: #92400e; }
+    #result-box.loading   { background: var(--azul-light); border: 1.5px solid #bfdbfe; color: var(--azul); }
 
-    #price-preview { background: var(--fondo); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; display: none; }
-    .pp-label { font-size: .65rem; color: var(--gris); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
-    .pp-price { font-size: 1.6rem; font-weight: 900; color: var(--azul); }
-    .pp-table { font-size: .68rem; color: var(--verde-dark); font-weight: 700; }
+    #price-preview { display: none; margin-bottom: 12px; }
+    #manual-name   { display: none; margin-bottom: 12px; }
 
-    #manual-name { display: none; margin-bottom: 10px; }
-
-    .btn-add {
-      width: 100%; padding: 15px; background: var(--verde); color: #fff;
-      border: none; border-radius: 35px; font-weight: 800; font-size: .9rem;
-      cursor: pointer; text-transform: uppercase; transition: .2s; min-height: 50px;
+    /* Cart items */
+    .cart-divider   { border: none; border-top: 1px dashed var(--border); margin: 16px 0 12px; }
+    .cart-label {
+      font-size: var(--ts-xs); font-weight: 800; color: var(--azul);
+      text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px;
+      display: flex; align-items: center; justify-content: space-between;
     }
-    .btn-add:active { background: var(--verde-dark); }
-
-    .cart-divider { border-top: 1px dashed #ddd; margin: 14px 0 10px; }
-    .cart-label { font-size: .7rem; font-weight: 800; color: var(--azul); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
-
-    .item-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid #f5f5f5; }
-    .item-prod { font-size: .6rem; color: #bbb; display: block; text-transform: uppercase; margin-bottom: 1px; }
-    .item-name { font-size: .82rem; font-weight: 700; color: #333; }
-    .item-tags { display: flex; gap: 4px; margin-top: 3px; flex-wrap: wrap; }
-    .cat-tag { font-size: .6rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; }
-    .cat-A { background: #d1fae5; color: #065f46; }
-    .cat-B { background: #dbeafe; color: #1e40af; }
-    .cat-C { background: #fef3c7; color: #92400e; }
-    .cat-D { background: #f3f4f6; color: #6b7280; }
-    .pt-small { font-size: .58rem; font-weight: 700; color: var(--verde-dark); background: #f0ffe0; padding: 2px 5px; border-radius: 3px; }
-    .item-price { font-size: .88rem; font-weight: 800; color: var(--azul); white-space: nowrap; }
-
-    .total-row { display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #eee; padding-top: 12px; margin-top: 6px; }
-    .total-label { font-size: .75rem; font-weight: 700; color: var(--gris); text-transform: uppercase; }
-    .total-price { font-size: 1.2rem; font-weight: 900; color: var(--azul); }
+    .cart-count-pill {
+      background: var(--azul-light); color: var(--azul);
+      font-size: var(--ts-xs); font-weight: 800;
+      padding: 2px 10px; border-radius: var(--r-pill);
+    }
 
     .btn-pay {
-      display: flex; align-items: center; justify-content: center;
-      background: var(--azul); color: #fff; text-align: center;
-      padding: 15px; border-radius: 14px; text-decoration: none;
-      font-weight: 800; font-size: .88rem; margin-top: 12px;
-      transition: .2s; min-height: 50px;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      background: var(--azul); color: #fff; padding: 15px; border-radius: var(--r-xl);
+      text-decoration: none; font-weight: 800; font-size: var(--ts-base);
+      margin-top: 14px; transition: background var(--t); min-height: 52px;
     }
-    .btn-pay:active { background: var(--azul-dark); }
-    .btn-clear { display: block; text-align: center; margin-top: 8px; color: #ccc; text-decoration: none; font-size: .7rem; font-weight: 600; }
-
-    .sticky-comprar { display: none; }
-    @media (max-width: 899px) {
-      .sticky-comprar {
-        display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 500;
-        background: #fff; padding: 12px 16px;
-        box-shadow: 0 -4px 16px rgba(0,0,0,.12);
-        gap: 10px; align-items: center;
-      }
-      .sticky-comprar-total { font-size: .78rem; font-weight: 800; color: var(--azul); white-space: nowrap; }
-      .sticky-comprar-total small { display: block; font-size: .62rem; color: var(--gris); font-weight: 400; }
-      .sticky-comprar a {
-        flex: 1; display: flex; align-items: center; justify-content: center;
-        background: var(--azul); color: #fff; text-decoration: none;
-        padding: 14px; border-radius: 35px; font-weight: 800; font-size: .9rem; min-height: 50px;
-      }
-      .cart-panel { padding-bottom: 80px; }
+    .btn-pay:hover { background: var(--azul-dark); }
+    .btn-clear {
+      display: block; text-align: center; margin-top: 10px;
+      color: var(--text-muted); font-size: var(--ts-sm); font-weight: 500;
+      text-decoration: none; transition: color var(--t);
     }
+    .btn-clear:hover { color: var(--error); }
 
-    footer { background: var(--azul); color: #fff; padding: 28px 16px; text-align: center; }
-    footer p { font-size: .72rem; opacity: .75; }
-
-    /* ══ RESPONSIVE ══ */
-    @media (min-width: 480px) {
-      .pt-grid { grid-template-columns: repeat(4, 1fr); }
+    /* ── RESPONSIVE ── */
+    @media (min-width: 768px) {
+      .breadcrumb { padding: 12px 5%; }
     }
     @media (min-width: 900px) {
       .page { max-width: 1100px; margin: 28px auto; flex-direction: row; align-items: flex-start; padding: 0 20px; }
       .product-card { flex: 1; }
-      .cart-panel { width: 360px; flex-shrink: 0; position: sticky; top: 130px; }
-      .product-img-box { height: 300px; }
-      footer { padding: 30px 5%; }
+      .cart-panel  { width: 360px; flex-shrink: 0; position: sticky; top: 130px; }
+      .product-img-box { height: 320px; }
     }
   </style>
 </head>
@@ -145,23 +130,35 @@
 
 {% include '_header.html' %}
 
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+  <a href="/">Inicio</a>
+  <span class="breadcrumb-sep">›</span>
+  <a href="/vacunas">Vacunas</a>
+  <span class="breadcrumb-sep">›</span>
+  <span>{{ producto.nombre }}</span>
+</div>
+
 <main class="page">
 
-  <!-- ── LEFT: Product ── -->
+  <!-- ── Producto ── -->
   <div class="product-card">
     <div class="product-img-box">
       <img src="{{ url_for('static', filename=producto.imagen) }}" alt="{{ producto.nombre }}">
+      {% if producto.badge %}
+      <span class="product-img-badge">{{ producto.badge }}</span>
+      {% endif %}
     </div>
     <div class="product-info">
-      <div class="product-title">{{ producto.nombre }}</div>
       <div class="product-sku">SKU: {{ producto.sku }}</div>
+      <div class="product-title">{{ producto.nombre }}</div>
       <p class="product-desc">{{ producto.descripcion }}</p>
 
-      <div class="pt-section-title">Precios por categoría de afiliación</div>
+      <div class="pt-section-label">Precios por categoría de afiliación</div>
       <div class="pt-grid">
         {% for cat, precio in producto.precios.items() %}
         <div class="pt-card" id="ptcard-{{ cat }}">
-          <span class="pt-cat">{% if cat == 'D' %}No Afiliado{% else %}Categoría {{ cat }}{% endif %}</span>
+          <span class="pt-cat">{% if cat == 'D' %}No Afiliado{% else %}Cat. {{ cat }}{% endif %}</span>
           <span class="pt-name">{{ producto.price_tables[cat] }}</span>
           <span class="pt-price">${{ "{:,.0f}".format(precio) }}</span>
         </div>
@@ -170,40 +167,52 @@
 
       <div class="cross-sell">
         <div class="cross-sell-icon">🩹</div>
-        <p>¿Necesitas más productos? <a href="/kit-salud">Ver Kit de Primeros Auxilios Premium</a></p>
+        <p>¿Necesitas más productos?<br>
+          <a href="/kit-salud">Ver Kit de Primeros Auxilios Premium →</a>
+        </p>
       </div>
     </div>
   </div>
 
-  <!-- ── RIGHT: Cart ── -->
+  <!-- ── Carrito ── -->
   <div class="cart-panel">
     <div class="cart-panel-header">
       <h3>Consulta tu beneficio</h3>
-      <p>Ingresa el documento del beneficiario para aplicar el precio correcto.</p>
+      <p>Ingresa el documento del beneficiario para aplicar el precio.</p>
     </div>
     <div class="cart-panel-body">
       <form method="POST">
-        <label class="field-label">Documento del beneficiario</label>
-        <input class="field-input" type="text" name="cedula" id="ced"
-               placeholder="Ej: 123, 456, 789, 12345…" autocomplete="off" required>
+        <div class="field">
+          <label class="field-label" for="ced">Documento del beneficiario</label>
+          <input class="field-input" type="text" name="cedula" id="ced"
+                 placeholder="Ej: 123, 456, 12345…" autocomplete="off" required>
+        </div>
 
         <div id="result-box"></div>
-        <div id="price-preview">
+        <div class="price-preview-box" id="price-preview">
           <div class="pp-label">Precio aplicado</div>
           <div class="pp-price" id="pp-val">—</div>
           <div class="pp-table" id="pt-val"></div>
         </div>
 
         <div id="manual-name">
-          <input class="field-input" type="text" name="nombre_manual" placeholder="Nombre completo del beneficiario">
+          <div class="field">
+            <label class="field-label">Nombre del beneficiario</label>
+            <input class="field-input" type="text" name="nombre_manual" placeholder="Nombre completo">
+          </div>
         </div>
 
-        <button type="submit" class="btn-add">Agregar al carrito</button>
+        <button type="submit" class="btn btn-secondary btn-full" style="margin-top:4px;">
+          + Agregar al carrito
+        </button>
       </form>
 
       {% if carrito %}
-      <div class="cart-divider"></div>
-      <div class="cart-label">Carrito ({{ carrito|length }} ítem{% if carrito|length != 1 %}s{% endif %})</div>
+      <hr class="cart-divider">
+      <div class="cart-label">
+        Carrito
+        <span class="cart-count-pill">{{ carrito|length }} ítem{% if carrito|length != 1 %}s{% endif %}</span>
+      </div>
       {% for item in carrito %}
       <div class="item-row">
         <div>
@@ -211,7 +220,7 @@
           <span class="item-name">{{ item.beneficiario }}</span>
           <div class="item-tags">
             <span class="cat-tag cat-{{ item.categoria }}">Cat. {{ item.categoria }}</span>
-            <span class="pt-small">{{ item.price_table }}</span>
+            <span class="pt-tag">{{ item.price_table }}</span>
           </div>
         </div>
         <span class="item-price">${{ "{:,.0f}".format(item.precio) }}</span>
@@ -229,25 +238,46 @@
 
 </main>
 
-<footer><p>&copy; 2026 Comfandi. Vigilado Supersalud.</p></footer>
+<footer class="site-footer-simple">&copy; 2026 Comfandi · Vigilado Supersalud</footer>
+
+{% if carrito %}
+<div class="sticky-cta">
+  <div class="sticky-cta-info">
+    <small>Total carrito</small>
+    ${{ "{:,.0f}".format(total) }}
+  </div>
+  <a href="/checkout-b2c">Finalizar compra →</a>
+</div>
+<div style="height:72px;"></div>
+{% endif %}
 
 <script>
   const API = '/_v/affiliation/';
-  const cedInput = document.getElementById('ced');
-  const resultBox = document.getElementById('result-box');
+  const cedInput     = document.getElementById('ced');
+  const resultBox    = document.getElementById('result-box');
   const pricePreview = document.getElementById('price-preview');
-  const ppVal = document.getElementById('pp-val');
-  const ptVal = document.getElementById('pt-val');
-  const manualName = document.getElementById('manual-name');
-  const precios = { A: {{ producto.precios.A }}, B: {{ producto.precios.B }}, C: {{ producto.precios.C }}, D: {{ producto.precios.D }} };
+  const ppVal        = document.getElementById('pp-val');
+  const ptVal        = document.getElementById('pt-val');
+  const manualName   = document.getElementById('manual-name');
+  const precios = {
+    A: {{ producto.precios.A }},
+    B: {{ producto.precios.B }},
+    C: {{ producto.precios.C }},
+    D: {{ producto.precios.D }}
+  };
 
   function highlightPT(cat) {
     document.querySelectorAll('.pt-card').forEach(c => {
       c.classList.remove('active');
-      c.querySelector('.pt-price').classList.remove('highlighted');
+      const p = c.querySelector('.pt-price');
+      if (p) p.classList.remove('highlighted');
     });
     const el = document.getElementById('ptcard-' + cat);
-    if (el) { el.classList.add('active'); el.querySelector('.pt-price').classList.add('highlighted'); }
+    if (el) {
+      el.classList.add('active');
+      const p = el.querySelector('.pt-price');
+      if (p) p.classList.add('highlighted');
+    }
   }
 
   let timer;
@@ -260,7 +290,7 @@
     highlightPT('');
     if (val.length < 2) return;
     resultBox.className = 'loading';
-    resultBox.innerHTML = '🔍 Consultando base de afiliados…';
+    resultBox.innerHTML = '<span class="animate-pulse">🔍</span> Consultando base de afiliados…';
     resultBox.style.display = 'block';
     timer = setTimeout(() => {
       fetch(API + encodeURIComponent(val))
@@ -269,11 +299,11 @@
           const precio = precios[data.category] || precios.D;
           if (data.found) {
             resultBox.className = 'found';
-            resultBox.innerHTML = `✅ <strong>${data.nombre}</strong><br>Categoría <strong>${data.category}</strong> · Price Table: <strong>${data.price_table}</strong>`;
+            resultBox.innerHTML = `✅ <strong>${data.nombre}</strong><br>Categoría <strong>${data.category}</strong> · ${data.price_table}`;
             manualName.style.display = 'none';
           } else {
             resultBox.className = 'not-found';
-            resultBox.innerHTML = `⚠️ No encontrado — Categoría <strong>D</strong> · PRICE_D`;
+            resultBox.innerHTML = `⚠️ No encontrado — se aplicará <strong>Categoría D</strong>`;
             manualName.style.display = 'block';
           }
           ppVal.textContent = '$' + precio.toLocaleString('es-CO');
@@ -282,19 +312,13 @@
           highlightPT(data.category);
           resultBox.style.display = 'block';
         })
-        .catch(() => { resultBox.className = 'not-found'; resultBox.innerHTML = '❌ Error al consultar.'; resultBox.style.display = 'block'; });
+        .catch(() => {
+          resultBox.className = 'not-found';
+          resultBox.innerHTML = '❌ Error al consultar. Intenta de nuevo.';
+          resultBox.style.display = 'block';
+        });
     }, 400);
   });
 </script>
-
-{% if carrito %}
-<div class="sticky-comprar">
-  <div class="sticky-comprar-total">
-    <small>Total carrito</small>
-    ${{ "{:,.0f}".format(total) }}
-  </div>
-  <a href="/checkout-b2c">Finalizar compra →</a>
-</div>
-{% endif %}
 </body>
 </html>
